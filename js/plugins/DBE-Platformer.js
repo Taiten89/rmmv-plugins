@@ -4,6 +4,11 @@ DBE.commands.platformer_start = function (mapId_str, x_str, y_str)
 {
     DBE.platformer.is_active = true;
 
+    DBE.platformer.orig_bgm = {...AudioManager.saveBgm()};
+    DBE.platformer.orig_bgs = {...AudioManager.saveBgs()};
+    AudioManager.stopBgm();
+    AudioManager.stopBgs();
+
     DBE.platformer.init();
 
     const mapId = Number(mapId_str);
@@ -15,6 +20,11 @@ DBE.commands.platformer_start = function (mapId_str, x_str, y_str)
 DBE.commands.platformer_stop = function ()
 {
     DBE.platformer.is_active = false;
+
+    AudioManager.playBgm(DBE.platformer.orig_bgm, DBE.platformer.orig_bgm.pos);
+    AudioManager.playBgs(DBE.platformer.orig_bgs);
+    DBE.platformer.orig_bgm = {};
+    DBE.platformer.orig_bgs = {};
 
     const mapId = DBE.platformer.orig_gameMap.mapId();
     const x = 0;
@@ -29,6 +39,8 @@ DBE.platformer =
     orig_dataMap: null,
     orig_gameMap: null,
     orig_player: null,
+    orig_bgm: {},
+    orig_bgs: {},
 
     defaults:
     {
