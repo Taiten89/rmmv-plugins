@@ -1,15 +1,25 @@
 "use strict";
 
-DBE.commands.platformer_start = function (mapId_str)
+DBE.commands.platformer_start = function (mapId_str, x_str, y_str)
 {
-    DBE.platformer.mapId = Number(mapId_str);
-    const Extended_Scene_Map = DBE.platformer.extend_Scene_Map();
-    SceneManager.goto(Extended_Scene_Map);
+    DBE.platformer.is_active = true;
+
+    DBE.platformer.init();
+
+    const mapId = Number(mapId_str);
+    const x = Number(x_str);
+    const y = Number(y_str);
+    $gamePlayer.reserveTransfer(mapId, x, y, 6, 0);
 };
 
 DBE.commands.platformer_stop = function ()
 {
-    SceneManager.goto(Scene_Map);
+    DBE.platformer.is_active = false;
+
+    const mapId = DBE.platformer.orig_gameMap.mapId();
+    const x = 0;
+    const y = 0;
+    $gamePlayer.reserveTransfer(mapId, x, y, 2, 0);
 };
 
 DBE.platformer =
@@ -19,7 +29,6 @@ DBE.platformer =
     orig_dataMap: null,
     orig_gameMap: null,
     orig_player: null,
-    mapId: 0,
 
     defaults:
     {
@@ -30,53 +39,23 @@ DBE.platformer =
     },
 };
 
-DBE.platformer.extend_Scene_Map = () =>
-class extends Scene_Map
+DBE.platformer.init = function ()
 {
-    create ()
-    {
-        DBE.platformer.orig_dataMap = $dataMap;
-        DBE.platformer.orig_gameMap = $gameMap;
-        DBE.platformer.orig_player = $gamePlayer;
+    DBE.platformer.orig_dataMap = $dataMap;
+    DBE.platformer.orig_gameMap = $gameMap;
+    DBE.platformer.orig_player = $gamePlayer;
+    const Extended_Game_Player = DBE.platformer.extend_Character(Game_Player);
+    $gamePlayer = new Extended_Game_Player();
+};
 
-        const Extended_Game_Player = DBE.platformer.extend_Character(Game_Player);
-        $gameMap = new Game_Map();
-        $gamePlayer = new Extended_Game_Player();
-
-        $gamePlayer.reserveTransfer(DBE.platformer.mapId, 0, 0, 6, 0);
-
-        super.create();
-    }
-
-    onMapLoaded ()
-    {
-        super.onMapLoaded();
-
-        const startXY_str = $dataMap.meta.startXY.split(',');
-        const startX = Number(startXY_str[0]);
-        const startY = Number(startXY_str[1]);
-        $gamePlayer.locate(startX, startY);
-    }
-
-    start ()
-    {
-        super.start();
-        DBE.platformer.is_active = true;
-    }
-
-    stop ()
-    {
-        super.stop();
-
-        $dataMap = DBE.platformer.orig_dataMap;
-        DBE.platformer.orig_dataMap = null;
-        $gameMap = DBE.platformer.orig_gameMap;
-        DBE.platformer.orig_gameMap = null;
-        $gamePlayer = DBE.platformer.orig_player;
-        DBE.platformer.orig_player = null;
-
-        DBE.platformer.is_active = false;
-    }
+DBE.platformer.uninit = function ()
+{
+    $dataMap = DBE.platformer.orig_dataMap;
+    DBE.platformer.orig_dataMap = null;
+    $gameMap = DBE.platformer.orig_gameMap;
+    DBE.platformer.orig_gameMap = null;
+    $gamePlayer = DBE.platformer.orig_player;
+    DBE.platformer.orig_player = null;
 };
 
 DBE.platformer.extend_Character = (Base) =>
@@ -93,6 +72,15 @@ class extends Base
 
         for (const k in DBE.platformer.defaults)
             this[k] = DBE.platformer.defaults[k];
+    }
+
+    performTransfer ()
+    {
+        if (DBE.platformer.is_active)
+            $gameMap = new Game_Map();
+        else
+            DBE.platformer.uninit();
+        super.performTransfer();
     }
 
     moveByInput ()
