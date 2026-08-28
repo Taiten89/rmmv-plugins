@@ -4,12 +4,12 @@ DBE.commands.platformer_start = function (mapId_str)
 {
     DBE.platformer.mapId = Number(mapId_str);
     const Extended_Scene_Map = DBE.platformer.extend_Scene_Map();
-    SceneManager.push(Extended_Scene_Map);
+    SceneManager.goto(Extended_Scene_Map);
 };
 
 DBE.commands.platformer_stop = function ()
 {
-    SceneManager.pop();
+    SceneManager.goto(Scene_Map);
 };
 
 DBE.platformer =
@@ -17,6 +17,7 @@ DBE.platformer =
     JUMP_INPUT: 'up',
     is_running: false,
     orig_dataMap: null,
+    orig_gameMap: null,
     orig_player: null,
     mapId: 0,
 
@@ -34,33 +35,39 @@ class extends Scene_Map
 {
     create ()
     {
-        Scene_Base.prototype.create.call(this);
         DBE.platformer.orig_dataMap = $dataMap;
-        DataManager.loadMapData(DBE.platformer.mapId);
+        DBE.platformer.orig_gameMap = $gameMap;
+        DBE.platformer.orig_player = $gamePlayer;
+
+        const Extended_Game_Player = DBE.platformer.extend_Character(Game_Player);
+        $gameMap = new Game_Map();
+        $gamePlayer = new Extended_Game_Player();
+
+        $gamePlayer.reserveTransfer(DBE.platformer.mapId, 0, 0, 6, 1);
+
+        DBE.platformer.is_running = true;
+
+        super.create();
     }
 
     onMapLoaded ()
     {
-        Scene_Map.prototype.onMapLoaded.call(this);
+        super.onMapLoaded();
 
-        DBE.platformer.orig_player = $gamePlayer;
-        const Extended_Game_Player = DBE.platformer.extend_Character(Game_Player);
-        $gamePlayer = new Extended_Game_Player();
-        const startXY_str = $dataMap.meta.start.split(',');
+        const startXY_str = $dataMap.meta.startXY.split(',');
         const startX = Number(startXY_str[0]);
         const startY = Number(startXY_str[1]);
         $gamePlayer.locate(startX, startY);
-
-        DBE.platformer.is_running = true;
     }
 
     stop ()
     {
-        Scene_Map.prototype.stop.call(this);
+        super.stop();
 
         $dataMap = DBE.platformer.orig_dataMap;
         DBE.platformer.orig_dataMap = null;
-
+        $dataMap = DBE.platformer.orig_gameMap;
+        DBE.platformer.orig_gameMap = null;
         $gamePlayer = DBE.platformer.orig_player;
         DBE.platformer.orig_player = null;
 
@@ -88,6 +95,11 @@ class extends Base
     {
         if (Input.isTriggered(DBE.platformer.JUMP_INPUT))
             this.is_jump_triggered = true;
+        if (!Input.isPressed(DBE.platformer.JUMP_INPUT))
+        {
+            this.is_jump_triggered = false;
+            this.jump_remaining = 0;
+        }
 
         if (!this.isMoving() && this.canMove())
         {
@@ -115,11 +127,6 @@ class extends Base
         {
             this.jump_remaining = this.jump_max;
             this.is_jump_triggered = false;
-        }
-        if (this.jump_remaining)
-        {
-            this.accelerate_y(-this.F_jump);
-            this.jump_remaining--;
         }
     }
 
@@ -243,5 +250,10 @@ class extends Base
     {
         this.accelerate_y(this.G);
 
+        if (this.jump_remaining)
+        {
+            this.accelerate_y(-this.F_jump);
+            this.jump_remaining--;
+        }
     }
 };
