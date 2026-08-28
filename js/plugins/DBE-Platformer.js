@@ -15,7 +15,7 @@ DBE.commands.platformer_stop = function ()
 DBE.platformer =
 {
     JUMP_INPUT: 'up',
-    is_running: false,
+    is_active: false,
     orig_dataMap: null,
     orig_gameMap: null,
     orig_player: null,
@@ -43,9 +43,7 @@ class extends Scene_Map
         $gameMap = new Game_Map();
         $gamePlayer = new Extended_Game_Player();
 
-        $gamePlayer.reserveTransfer(DBE.platformer.mapId, 0, 0, 6, 1);
-
-        DBE.platformer.is_running = true;
+        $gamePlayer.reserveTransfer(DBE.platformer.mapId, 0, 0, 6, 0);
 
         super.create();
     }
@@ -60,18 +58,24 @@ class extends Scene_Map
         $gamePlayer.locate(startX, startY);
     }
 
+    start ()
+    {
+        super.start();
+        DBE.platformer.is_active = true;
+    }
+
     stop ()
     {
         super.stop();
 
         $dataMap = DBE.platformer.orig_dataMap;
         DBE.platformer.orig_dataMap = null;
-        $dataMap = DBE.platformer.orig_gameMap;
+        $gameMap = DBE.platformer.orig_gameMap;
         DBE.platformer.orig_gameMap = null;
         $gamePlayer = DBE.platformer.orig_player;
         DBE.platformer.orig_player = null;
 
-        DBE.platformer.is_running = false;
+        DBE.platformer.is_active = false;
     }
 };
 
@@ -167,11 +171,6 @@ class extends Base
     hasStepAnime ()
     {
         return Math.abs(this.speed_x) > 0.0;
-    }
-
-    shiftY ()
-    {
-        return 0;
     }
 
     update ()
