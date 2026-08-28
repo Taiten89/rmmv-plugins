@@ -261,3 +261,14 @@ class extends Base
         this._y = Math.round(this._realY);
     }
 };
+
+{  //  stop minigame instead of menu
+    const super_callMenu = Scene_Map.prototype.callMenu;
+    Scene_Map.prototype.callMenu = function ()
+    {
+        if (DBE.platformer.is_active)
+            DBE.commands.platformer_stop();
+        else
+            super_callMenu.call(this);
+    };
+}
