@@ -96,14 +96,24 @@ class extends Base
     }
 
     moveByInput () {}
-    updateMove () {}
+    //updateMove () {}
     updateAnalogMove () {}  //  SAN_AnalogMove
+    isMoving ()
+    {
+        return this.speed_x!==0.0 || this.speed_y!==0.0;
+    }
+    hasStepAnime ()
+    {
+        return this.speed_x!==0.0;
+    }
 
-    update ()
+    update (sceneActive)
     {
         this.dbe_move_by_input();
         this.dbe_update_move();
-        super.update();
+        if (this.canMove())
+            this.dbe_scroll_to_front();
+        super.update(sceneActive);
     }
 
     setDirection (dir)
@@ -111,11 +121,6 @@ class extends Base
         if (dir === 2 || dir === 8)
             return;
         super.setDirection(dir);
-    }
-
-    isMoving ()
-    {
-        return false;
     }
 
     dbe_move_by_input ()
@@ -184,8 +189,8 @@ class extends Base
 
     apply_wind_resistance ()
     {
-        this.speed_x *= 1.0 - 1.0 / 32.0;
-        this.speed_y *= 1.0 - 1.0 / 32.0;
+        this.speed_x *= 1.0 - 1.0 / 48.0;
+        this.speed_y *= 1.0 - 1.0 / 48.0;
     }
 
     is_on_ground ()
@@ -195,12 +200,7 @@ class extends Base
         return !can_pass && !has_gap;
     }
 
-    hasStepAnime ()
-    {
-        return Math.abs(this.speed_x) > 0.0;
-    }
-
-    dbe_update_move()
+    dbe_update_move ()
     {
         this.accelerate_y(this.G);
 
@@ -266,6 +266,18 @@ class extends Base
 
         this._x = Math.round(this._realX);
         this._y = Math.round(this._realY);
+    }
+
+    dbe_scroll_to_front ()
+    {
+        const delta_x_pixels = (this.screenX() + this.speed_x*500
+            - Graphics.boxWidth / 2);
+        const delta_y_pixels = (this.screenY() + this.speed_y*500
+            - Graphics.boxHeight / 2);
+        const delta_x = delta_x_pixels / $gameMap.tileWidth();
+        const delta_y = delta_y_pixels / $gameMap.tileHeight();
+        $gameMap._displayX += delta_x / 8;
+        $gameMap._displayY += delta_y / 8;
     }
 };
 
