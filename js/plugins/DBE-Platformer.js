@@ -167,20 +167,13 @@ class extends Base
 
     brake_x ()
     {
-        const orig_speed_x = this.speed_x;
-        const force = -1.0 / 4 * orig_speed_x;
-        this.accelerate_x(force);
+        this.speed_x *= 0.75;
+    }
 
-        if (orig_speed_x > 0.0)
-        {
-            if (this.speed_x < 0.0)
-                this.speed_x = 0.0;
-        }
-        else if (orig_speed_x < 0.0)
-        {
-            if (this.speed_x > 0.0)
-                this.speed_x = 0.0;
-        }
+    apply_wind_resistance ()
+    {
+        this.speed_x *= 1.0 - 1.0 / 32.0;
+        this.speed_y *= 1.0 - 1.0 / 32.0;
     }
 
     is_on_ground ()
@@ -204,6 +197,8 @@ class extends Base
             this.accelerate_y(-this.F_jump);
             this.jump_remaining--;
         }
+
+        this.apply_wind_resistance();
 
         if (this.speed_x > 0.0)
         {
