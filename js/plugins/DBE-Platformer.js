@@ -32,10 +32,10 @@ DBE.platformer =
 
     defaults:
     {
-        G: 9.8 / 60 / 2,  // assuming 2m field height
-        F_side: 0.5 * 9.8 / 60 / 10,
-        F_jump: 0.5 * 9.8 / 60 * 2,
-        jump_max: Math.round(0.5 * 60),
+        G: 9.8 / 60 / 2 / 4,  // assuming 2m field height; /4 because slower is more fun
+        F_side: 0.3 * 9.8 / 60 / 2,
+        F_jump: 0.075,
+        jump_max: Math.round(0.12 * 60),
     },
 };
 
@@ -83,7 +83,30 @@ class extends Base
         super.performTransfer();
     }
 
-    moveByInput ()
+    moveByInput () {}
+    updateMove () {}
+    updateAnalogMove () {}  //  SAN_AnalogMove
+
+    update ()
+    {
+        this.dbe_move_by_input();
+        this.dbe_update_move();
+        super.update();
+    }
+
+    setDirection (dir)
+    {
+        if (dir === 2 || dir === 8)
+            return;
+        super.setDirection(dir);
+    }
+
+    isMoving ()
+    {
+        return false;
+    }
+
+    dbe_move_by_input ()
     {
         if (Input.isTriggered(DBE.platformer.JUMP_INPUT))
             this.is_jump_triggered = true;
@@ -93,27 +116,37 @@ class extends Base
             this.jump_remaining = 0;
         }
 
-        if (!this.isMoving() && this.canMove())
+        if (/*!this.isMoving() &&*/ this.canMove())
         {
-            this.handle_direction_input();
+            this.dbe_move_by_direction_input();
 
             if (Input.isPressed(DBE.platformer.JUMP_INPUT))
-                this.handle_jump_pressed();
+                this.dbe_handle_jump_pressed();
         }
     }
 
-    handle_direction_input ()
+    dbe_move_by_direction_input ()
     {
         const direction = this.getInputDirection();
-        if (direction === 4)
-            this.accelerate_x(+this.F_side);
-        else if (direction === 6)
-            this.accelerate_x(-this.F_side);
-        else if (this.is_on_ground())
-            this.brake_x();
+        if (this.is_on_ground())
+        {
+            if (direction === 4)
+                this.accelerate_x(-this.F_side);
+            else if (direction === 6)
+                this.accelerate_x(+this.F_side);
+            else
+                this.brake_x();
+        }
+        else
+        {
+            if (direction === 4)
+                this.accelerate_x(-this.F_side / 4);
+            else if (direction === 6)
+                this.accelerate_x(+this.F_side / 4);
+        }
     }
 
-    handle_jump_pressed ()
+    dbe_handle_jump_pressed ()
     {
         if (this.is_jump_triggered && this.is_on_ground())
         {
@@ -134,18 +167,17 @@ class extends Base
 
     brake_x ()
     {
-        const force = 1.0 / 64 * this.speed_x;
+        const orig_speed_x = this.speed_x;
+        const force = -1.0 / 4 * orig_speed_x;
+        this.accelerate_x(force);
 
-        if (this.speed_x > 0.0)
+        if (orig_speed_x > 0.0)
         {
-            this.speed_x -= force;
             if (this.speed_x < 0.0)
                 this.speed_x = 0.0;
         }
-
-        else if (this.speed_x < 0.0)
+        else if (orig_speed_x < 0.0)
         {
-            this.speed_x += force;
             if (this.speed_x > 0.0)
                 this.speed_x = 0.0;
         }
@@ -153,7 +185,9 @@ class extends Base
 
     is_on_ground ()
     {
-        return !canPass(this._x, this._y, 2) && this._realY === this._y;
+        const can_pass = this.canPass(this._x, this._y, 2);
+        const has_gap = this._realY !== this._y;
+        return !can_pass && !has_gap;
     }
 
     hasStepAnime ()
@@ -161,21 +195,15 @@ class extends Base
         return Math.abs(this.speed_x) > 0.0;
     }
 
-    update ()
+    dbe_update_move()
     {
-        super.update();
-    }
+        this.accelerate_y(this.G);
 
-    updateJump ()
-    {
-        // originally for jump move route command
-    }
-
-    updateMove ()
-    {
-        // originally for transitioning between fields
-
-        this.update_speed_y();
+        if (this.jump_remaining)
+        {
+            this.accelerate_y(-this.F_jump);
+            this.jump_remaining--;
+        }
 
         if (this.speed_x > 0.0)
         {
@@ -231,16 +259,5 @@ class extends Base
 
         this._x = Math.round(this._realX);
         this._y = Math.round(this._realY);
-    }
-
-    update_speed_y ()
-    {
-        this.accelerate_y(this.G);
-
-        if (this.jump_remaining)
-        {
-            this.accelerate_y(-this.F_jump);
-            this.jump_remaining--;
-        }
     }
 };
