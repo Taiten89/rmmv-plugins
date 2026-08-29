@@ -113,11 +113,15 @@ class extends Base
     updateAnalogMove () {}  //  SAN_AnalogMove
     isMoving ()
     {
-        return this.speed_x!==0.0 || this.speed_y!==0.0;
+        if (!this.is_on_ground)
+            return true;
+        return Math.abs(this.speed_x)>0.001;
     }
-    hasStepAnime ()
+    hasWalkAnime ()
     {
-        return this.speed_x!==0.0;
+        if (!this.is_on_ground)
+            return false;
+        return super.hasWalkAnime();
     }
     locate (x, y)
     {
@@ -133,6 +137,7 @@ class extends Base
         this.dbe_update_move();
         if (this.canMove())
             this.dbe_scroll_to_front();
+        this.updateAnimation();
         super.update(sceneActive);
     }
 
