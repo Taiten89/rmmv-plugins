@@ -222,9 +222,10 @@ class extends Base
 
         if (this.speed_x > 0.0)
         {
-            if (this.canPass(this._x, this._y, 6))
+            const gap = this._x - this._realX;
+            if (this.speed_x < gap)
                 this._realX += this.speed_x;
-            else if (this.speed_x < this._x - this._realX)
+            else if (this.canPass(this._x, this._y, 6))
                 this._realX += this.speed_x;
             else
             {
@@ -235,7 +236,8 @@ class extends Base
 
         if (this.speed_x < 0.0)
         {
-            if (this.speed_x > this._x - this._realX)
+            const gap = this._realX - this._x;
+            if (-this.speed_x < gap)
                 this._realX += this.speed_x;
             else if (this.canPass(this._x, this._y, 4))
                 this._realX += this.speed_x;
@@ -248,7 +250,8 @@ class extends Base
 
         if (this.speed_y > 0.0)
         {
-            if (this.speed_y < this._y - this._realY)
+            const gap = this._y - this._realY;
+            if (this.speed_y < gap)
                 this._realY += this.speed_y;
             else if (this.canPass(this._x, this._y, 2))
                 this._realY += this.speed_y;
@@ -261,7 +264,8 @@ class extends Base
 
         if (this.speed_y < 0.0)
         {
-            if (this.speed_y > this._y - this._realY)
+            const gap = this._realY - this._y;
+            if (-this.speed_y < gap)
                 this._realY += this.speed_y;
             else if (this.canPass(this._x, this._y, 8))
                 this._realY += this.speed_y;
