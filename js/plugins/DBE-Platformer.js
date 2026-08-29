@@ -9,7 +9,9 @@ DBE.commands.platformer_start = function (mapId_str, x_str, y_str)
     AudioManager.stopBgm();
     AudioManager.stopBgs();
 
-    DBE.platformer.init();
+    DBE.platformer.store_orig();
+    const Extended_Game_Player = DBE.platformer.extend_Character(Game_Player);
+    $gamePlayer = new Extended_Game_Player();
 
     const mapId = Number(mapId_str);
     const x = Number(x_str);
@@ -51,16 +53,14 @@ DBE.platformer =
     },
 };
 
-DBE.platformer.init = function ()
+DBE.platformer.store_orig = function ()
 {
     DBE.platformer.orig_dataMap = $dataMap;
     DBE.platformer.orig_gameMap = $gameMap;
     DBE.platformer.orig_player = $gamePlayer;
-    const Extended_Game_Player = DBE.platformer.extend_Character(Game_Player);
-    $gamePlayer = new Extended_Game_Player();
 };
 
-DBE.platformer.uninit = function ()
+DBE.platformer.unstore_orig = function ()
 {
     $dataMap = DBE.platformer.orig_dataMap;
     DBE.platformer.orig_dataMap = null;
@@ -102,7 +102,7 @@ class extends Base
 
         if (!DBE.platformer.is_active)
         {
-            DBE.platformer.uninit();
+            DBE.platformer.unstore_orig();
             super.performTransfer();
             return;
         }
