@@ -34,7 +34,7 @@ DBE.commands.platformer_stop = function ()
 
 DBE.platformer =
 {
-    JUMP_INPUT: 'up',
+    JUMP_INPUT: 'ok',
     is_active: false,
     orig_dataMap: null,
     orig_gameMap: null,
@@ -81,6 +81,7 @@ class extends Base
         this.speed_y = 0.0;
         this.jump_remaining = 0;
         this.is_jump_triggered = false;
+        this.is_on_ground = false;
 
         for (const k in DBE.platformer.defaults)
             this[k] = DBE.platformer.defaults[k];
@@ -145,7 +146,7 @@ class extends Base
     dbe_move_by_direction_input ()
     {
         const direction = this.getInputDirection();
-        if (this.is_on_ground())
+        if (this.is_on_ground)
         {
             if (direction === 4)
                 this.accelerate_x(-this.F_side);
@@ -165,7 +166,7 @@ class extends Base
 
     dbe_handle_jump_pressed ()
     {
-        if (this.is_jump_triggered && this.is_on_ground())
+        if (this.is_jump_triggered && this.is_on_ground)
         {
             this.jump_remaining = this.jump_max;
             this.is_jump_triggered = false;
@@ -189,15 +190,20 @@ class extends Base
 
     apply_wind_resistance ()
     {
-        this.speed_x *= 1.0 - 1.0 / 48.0;
-        this.speed_y *= 1.0 - 1.0 / 48.0;
+        this.speed_x *= 1.0 - 1.0 / 64.0;
+        this.speed_y *= 1.0 - 1.0 / 64.0;
     }
 
-    is_on_ground ()
+    apply_ground_resistance ()
+    {
+        this.speed_x *= 1.0 - 1.0 / 32.0;
+    }
+
+    update_is_on_ground ()
     {
         const can_pass = this.canPass(this._x, this._y, 2);
         const has_gap = this._realY !== this._y;
-        return !can_pass && !has_gap;
+        this.is_on_ground = !can_pass && !has_gap;
     }
 
     dbe_update_move ()
@@ -211,6 +217,8 @@ class extends Base
         }
 
         this.apply_wind_resistance();
+        if (this.is_on_ground)
+            this.apply_ground_resistance();
 
         if (this.speed_x > 0.0)
         {
@@ -266,6 +274,8 @@ class extends Base
 
         this._x = Math.round(this._realX);
         this._y = Math.round(this._realY);
+
+        this.update_is_on_ground();
     }
 
     dbe_scroll_to_front ()
