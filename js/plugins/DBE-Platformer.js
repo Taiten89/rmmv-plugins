@@ -77,6 +77,8 @@ class extends Base
     {
         super.initMembers();
 
+        this.__x = this._realX;
+        this.__y = this._realY;
         this.speed_x = 0.0;
         this.speed_y = 0.0;
         this.jump_remaining = 0;
@@ -107,6 +109,13 @@ class extends Base
     {
         return this.speed_x!==0.0;
     }
+    locate (x, y)
+    {
+        this.__x = x;
+        this.__y = y;
+        super.locate(x, y);
+        this.update_is_on_ground();
+    }
 
     update (sceneActive)
     {
@@ -134,7 +143,7 @@ class extends Base
             this.jump_remaining = 0;
         }
 
-        if (/*!this.isMoving() &&*/ this.canMove())
+        if (this.canMove())
         {
             this.dbe_move_by_direction_input();
 
@@ -222,64 +231,73 @@ class extends Base
 
         if (this.speed_x > 0.0)
         {
-            const gap = this._x - this._realX;
+            const gap = this._x - this.__x;
             if (this.speed_x < gap)
-                this._realX += this.speed_x;
+                this.__x += this.speed_x;
             else if (this.canPass(this._x, this._y, 6))
-                this._realX += this.speed_x;
+                this.__x += this.speed_x;
             else
             {
-                this._realX = this._x;
+                this.__x = this._x;
                 this.speed_x = 0.0;
             }
         }
 
         if (this.speed_x < 0.0)
         {
-            const gap = this._realX - this._x;
+            const gap = this.__x - this._x;
             if (-this.speed_x < gap)
-                this._realX += this.speed_x;
+                this.__x += this.speed_x;
             else if (this.canPass(this._x, this._y, 4))
-                this._realX += this.speed_x;
+                this.__x += this.speed_x;
             else
             {
-                this._realX = this._x;
+                this.__x = this._x;
                 this.speed_x = 0.0;
             }
         }
 
+        this.dbe_update_coordinates();
+        this.update_is_on_ground();
+
         if (this.speed_y > 0.0)
         {
-            const gap = this._y - this._realY;
+            const gap = this._y - this.__y;
             if (this.speed_y < gap)
-                this._realY += this.speed_y;
+                this.__y += this.speed_y;
             else if (this.canPass(this._x, this._y, 2))
-                this._realY += this.speed_y;
+                this.__y += this.speed_y;
             else
             {
-                this._realY = this._y;
+                this.__y = this._y;
                 this.speed_y = 0.0;
             }
         }
 
         if (this.speed_y < 0.0)
         {
-            const gap = this._realY - this._y;
+            const gap = this.__y - this._y;
             if (-this.speed_y < gap)
-                this._realY += this.speed_y;
+                this.__y += this.speed_y;
             else if (this.canPass(this._x, this._y, 8))
-                this._realY += this.speed_y;
+                this.__y += this.speed_y;
             else
             {
-                this._realY = this._y;
+                this.__y = this._y;
                 this.speed_y = 0.0;
             }
         }
 
-        this._x = Math.round(this._realX);
-        this._y = Math.round(this._realY);
-
+        this.dbe_update_coordinates();
         this.update_is_on_ground();
+    }
+
+    dbe_update_coordinates ()
+    {
+        this._x = Math.round(this.__x);
+        this._y = Math.round(this.__y);
+        this._realX = this.__x;
+        this._realY = this.__y;
     }
 
     dbe_scroll_to_front ()
