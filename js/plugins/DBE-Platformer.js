@@ -77,6 +77,7 @@ class extends Base
     {
         super.initMembers();
 
+        this.is_initted = false;
         this.__x = this._realX;
         this.__y = this._realY;
         this.speed_x = 0.0;
@@ -91,11 +92,20 @@ class extends Base
 
     performTransfer ()
     {
-        if (DBE.platformer.is_active)
+        if (!this.is_initted)
+        {
             $gameMap = new Game_Map();
-        else
+            super.performTransfer();
+            this.is_initted = true;
+            return;
+        }
+
+        if (!DBE.platformer.is_active)
+        {
             DBE.platformer.uninit();
-        super.performTransfer();
+            super.performTransfer();
+            return;
+        }
     }
 
     moveByInput () {}
