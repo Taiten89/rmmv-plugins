@@ -76,6 +76,7 @@ class extends Base
     initMembers ()
     {
         super.initMembers();
+        //this._followers._data = []  //  without SAN_AnalogMove
 
         this.is_initted = false;
         this.__x = this._realX;
@@ -109,8 +110,9 @@ class extends Base
     }
 
     moveByInput () {}
-    //updateMove () {}
-    updateAnalogMove () {}  //  SAN_AnalogMove
+    //updateMove () {}  //  without SAN_AnalogMove
+    updateAnalogMove () {}  //  with SAN_AnalogMove
+    //updateScroll (lastScrolledX, lastScrolledY) {}  //  without SAN_AnalogMove
     isMoving ()
     {
         if (!this.is_on_ground)
