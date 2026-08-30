@@ -14,6 +14,8 @@
                 this.__y = this._realY;
                 this.speed_x = 0.0;
                 this.speed_y = 0.0;
+                this.min_speed = 0.01 * this.F_side;
+                this.needs_drag_to_raster = false;
             }
 
             moveByInput () {}
@@ -80,7 +82,13 @@
 
             dbe_update_move ()
             {
+                let next_needs_drag_to_raster = false;
+
+                this.apply_min_speed();
                 this.apply_ground_resistance();
+
+                if (this.needs_drag_to_raster)
+                    this.drag_to_raster();
 
                 if (this.speed_x > 0.0)
                 {
@@ -90,10 +98,7 @@
                     else if (this.dbe_can_pass(6))
                         this.__x += this.speed_x;
                     else
-                    {
-                        this.__x = this._x;
-                        this.speed_x = 0.0;
-                    }
+                        next_needs_drag_to_raster = true;
                 }
 
                 if (this.speed_x < 0.0)
@@ -104,13 +109,13 @@
                     else if (this.dbe_can_pass(4))
                         this.__x += this.speed_x;
                     else
-                    {
-                        this.__x = this._x;
-                        this.speed_x = 0.0;
-                    }
+                        next_needs_drag_to_raster = true;
                 }
 
                 this.dbe_update_coordinates();
+
+                if (this.needs_drag_to_raster)
+                    this.drag_to_raster();
 
                 if (this.speed_y > 0.0)
                 {
@@ -120,10 +125,7 @@
                     else if (this.dbe_can_pass(2))
                         this.__y += this.speed_y;
                     else
-                    {
-                        this.__y = this._y;
-                        this.speed_y = 0.0;
-                    }
+                        next_needs_drag_to_raster = true;
                 }
 
                 if (this.speed_y < 0.0)
@@ -134,13 +136,11 @@
                     else if (this.dbe_can_pass(8))
                         this.__y += this.speed_y;
                     else
-                    {
-                        this.__y = this._y;
-                        this.speed_y = 0.0;
-                    }
+                        next_needs_drag_to_raster = true;
                 }
 
                 this.dbe_update_coordinates();
+                this.needs_drag_to_raster = next_needs_drag_to_raster;
             }
 
             dbe_can_pass (dir)
@@ -159,6 +159,31 @@
                 this._y = Math.round(this.__y);
                 this._realX = this.__x;
                 this._realY = this.__y;
+            }
+
+            drag_to_raster ()
+            {
+                const SPEED = 1.0 * this.F_side / 2;  //  called twice
+                if (this.__x < this._x)
+                    this.__x += SPEED;
+                if (this.__x > this._x)
+                    this.__x -= SPEED;
+                if (this.__y < this._y)
+                    this.__y += SPEED;
+                if (this.__y > this._y)
+                    this.__y -= SPEED;
+                if (Math.abs(this.__x-this._x) < SPEED)
+                    this.__x = this._x;
+                if (Math.abs(this.__y-this._y) < SPEED)
+                    this.__y = this._y;
+            }
+
+            apply_min_speed ()
+            {
+                if (Math.abs(this.speed_x) < this.min_speed)
+                    this.speed_x = 0.0;
+                if (Math.abs(this.speed_y) < this.min_speed)
+                    this.speed_y = 0.0;
             }
 
             dbe_scroll_to_front ()
