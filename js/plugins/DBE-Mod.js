@@ -9,12 +9,12 @@
                 super.initMembers();
                 this._followers._data = [];
 
-                this.F_side = 0.2 * 9.8 / 60 / 2;  //  assuming 2m field height
+                this.F_side = 0.3 * 9.8 / 60 / 2.0;  //  assuming 2m field width
                 this.__x = this._realX;
                 this.__y = this._realY;
                 this.speed_x = 0.0;
                 this.speed_y = 0.0;
-                this.min_speed = 0.01 * this.F_side;
+                this.min_speed = 0.5 * this.F_side;
                 this.needs_drag_to_raster = false;
             }
 
@@ -23,7 +23,9 @@
             updateScroll (lastScrolledX, lastScrolledY) {}
             isMoving ()
             {
-                return Math.abs(this.speed_x)>0.001 || Math.abs(this.speed_y)>0.001;
+                if ($gameMap.isEventRunning())
+                    return super.isMoving();
+                return this.speed_x!==0.0 || this.speed_y!==0.0;
             }
             locate (x, y)
             {
@@ -37,8 +39,8 @@
                 if (this.canMove())
                     this.dbe_move_by_input();
                 this.dbe_update_move();
-                if (this.canMove())
-                    this.dbe_scroll_to_front();
+                this.dbe_scroll_to_front();
+
                 super.update(sceneActive);
             }
 
@@ -54,8 +56,6 @@
                     this.accelerate_x(+this.F_side);
                 else if (direction === 8)
                     this.accelerate_y(-this.F_side);
-                else
-                    this.brake();
             }
 
             accelerate_x (force)
@@ -68,16 +68,15 @@
                 this.speed_y += force;
             }
 
-            brake ()
-            {
-                this.speed_x *= 1.0 - 1.0 / 4.0;
-                this.speed_y *= 1.0 - 1.0 / 4.0;
-            }
-
             apply_ground_resistance ()
             {
-                this.speed_x *= 1.0 - 1.0 / 16.0;
-                this.speed_y *= 1.0 - 1.0 / 16.0;
+                this.speed_x *= 1.0 - this.ground_resistance();
+                this.speed_y *= 1.0 - this.ground_resistance();
+            }
+
+            ground_resistance ()
+            {
+                return 0.12;
             }
 
             dbe_update_move ()
@@ -92,7 +91,10 @@
 
                 const apply_speed_x_successful = this.apply_speed_x();
                 if (!apply_speed_x_successful)
+                {
+                    this.speed_x = 0.0;
                     next_needs_drag_to_raster = true;
+                }
 
                 this.dbe_update_coordinates();
 
@@ -101,9 +103,13 @@
 
                 const apply_speed_y_successful = this.apply_speed_y();
                 if (!apply_speed_y_successful)
+                {
+                    this.speed_y = 0.0;
                     next_needs_drag_to_raster = true;
+                }
 
                 this.dbe_update_coordinates();
+
                 this.needs_drag_to_raster = next_needs_drag_to_raster;
             }
 
@@ -206,14 +212,14 @@
 
             dbe_scroll_to_front ()
             {
-                const delta_x_pixels = (this.screenX() + this.speed_x*500
+                const delta_x_pixels = (this.screenX() + this.speed_x*1300
                     - Graphics.boxWidth / 2);
-                const delta_y_pixels = (this.screenY() + this.speed_y*500
+                const delta_y_pixels = (this.screenY() + this.speed_y*1300
                     - Graphics.boxHeight / 2);
                 const delta_x = delta_x_pixels / $gameMap.tileWidth();
                 const delta_y = delta_y_pixels / $gameMap.tileHeight();
-                $gameMap._displayX += delta_x / 8;
-                $gameMap._displayY += delta_y / 8;
+                $gameMap._displayX += delta_x / 16;
+                $gameMap._displayY += delta_y / 16;
             }
         };
     }
