@@ -16,6 +16,10 @@
                 this.speed_y = 0.0;
                 this.min_speed = 0.5 * this.F_side;
                 this.needs_drag_to_raster = false;
+                this.dbe_last_nonmoving_phase_x = -1;
+                this.dbe_last_nonmoving_phase_y = -1;
+                this.dbe_needs_nonmoving_phase = false;
+                this.dbe_is_in_nonmoving_phase = false;
             }
 
             moveByInput () {}
@@ -25,6 +29,8 @@
             {
                 if ($gameMap.isEventRunning())
                     return super.isMoving();
+                if (this.dbe_is_in_nonmoving_phase)
+                    return false;
                 return this.speed_x!==0.0 || this.speed_y!==0.0;
             }
             locate (x, y)
@@ -39,6 +45,7 @@
                 if (this.canMove())
                     this.dbe_move_by_input();
                 this.dbe_update_move();
+                this.dbe_update_nonmoving_phase();
                 this.dbe_scroll_to_front();
 
                 super.update(sceneActive);
@@ -220,6 +227,19 @@
                 const delta_y = delta_y_pixels / $gameMap.tileHeight();
                 $gameMap._displayX += delta_x / 16;
                 $gameMap._displayY += delta_y / 16;
+            }
+
+            dbe_update_nonmoving_phase ()
+            {
+                this.dbe_is_in_nonmoving_phase = false;
+                const cond_x = this._x !== this.dbe_last_nonmoving_phase_x;
+                const cond_y = this._y !== this.dbe_last_nonmoving_phase_y;
+                if (cond_x || cond_y)
+                {
+                    this.dbe_is_in_nonmoving_phase = true;
+                    this.dbe_last_nonmoving_phase_x = this._x;
+                    this.dbe_last_nonmoving_phase_y = this._y;
+                }
             }
         };
     }
