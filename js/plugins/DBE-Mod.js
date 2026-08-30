@@ -22,7 +22,6 @@
                 this.dbe_is_in_nonmoving_phase = false;
             }
 
-            moveByInput () {}
             updateMove () {}
             updateScroll (lastScrolledX, lastScrolledY) {}
             isMoving ()
@@ -42,16 +41,13 @@
 
             update (sceneActive)
             {
-                if (this.canMove())
-                    this.dbe_move_by_input();
                 this.dbe_update_move();
                 this.dbe_update_nonmoving_phase();
                 this.dbe_scroll_to_front();
-
                 super.update(sceneActive);
             }
 
-            dbe_move_by_input ()
+            moveByInput ()
             {
                 const direction = this.getInputDirection();
                 this.setDirection(direction);
