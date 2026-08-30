@@ -87,7 +87,7 @@
                     const gap = this._x - this.__x;
                     if (this.speed_x < gap)
                         this.__x += this.speed_x;
-                    else if (this.canPass(this._x, this._y, 6))
+                    else if (this.dbe_can_pass(6))
                         this.__x += this.speed_x;
                     else
                     {
@@ -101,7 +101,7 @@
                     const gap = this.__x - this._x;
                     if (-this.speed_x < gap)
                         this.__x += this.speed_x;
-                    else if (this.canPass(this._x, this._y, 4))
+                    else if (this.dbe_can_pass(4))
                         this.__x += this.speed_x;
                     else
                     {
@@ -117,7 +117,7 @@
                     const gap = this._y - this.__y;
                     if (this.speed_y < gap)
                         this.__y += this.speed_y;
-                    else if (this.canPass(this._x, this._y, 2))
+                    else if (this.dbe_can_pass(2))
                         this.__y += this.speed_y;
                     else
                     {
@@ -131,7 +131,7 @@
                     const gap = this.__y - this._y;
                     if (-this.speed_y < gap)
                         this.__y += this.speed_y;
-                    else if (this.canPass(this._x, this._y, 8))
+                    else if (this.dbe_can_pass(8))
                         this.__y += this.speed_y;
                     else
                     {
@@ -141,6 +141,16 @@
                 }
 
                 this.dbe_update_coordinates();
+            }
+
+            dbe_can_pass (dir)
+            {
+                if (dir === 2 || dir === 8)
+                    return this.canPass(Math.floor(this.__x), this._y, dir) &&
+                        this.canPass(Math.ceil(this.__x), this._y, dir);
+                if (dir === 4 || dir === 6)
+                    return this.canPass(this._x, Math.floor(this.__y), dir) &&
+                        this.canPass(this._x, Math.ceil(this.__y), dir);
             }
 
             dbe_update_coordinates ()
