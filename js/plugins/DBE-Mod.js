@@ -37,13 +37,13 @@
                 this.dbe_update_move();
                 if (this.canMove())
                     this.dbe_scroll_to_front();
-                this.updateAnimation();
                 super.update(sceneActive);
             }
 
             dbe_move_by_input ()
             {
                 const direction = this.getInputDirection();
+                this.setDirection(direction);
                 if (direction === 2)
                     this.accelerate_y(this.F_side);
                 else if (direction === 4)
@@ -74,8 +74,8 @@
 
             apply_ground_resistance ()
             {
-                this.speed_x *= 1.0 - 1.0 / 24.0;
-                this.speed_y *= 1.0 - 1.0 / 24.0;
+                this.speed_x *= 1.0 - 1.0 / 16.0;
+                this.speed_y *= 1.0 - 1.0 / 16.0;
             }
 
             dbe_update_move ()
