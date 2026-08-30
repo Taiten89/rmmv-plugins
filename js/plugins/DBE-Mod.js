@@ -90,54 +90,18 @@
                 if (this.needs_drag_to_raster)
                     this.drag_to_raster();
 
-                if (this.speed_x > 0.0)
-                {
-                    const gap = this._x - this.__x;
-                    if (this.speed_x < gap)
-                        this.__x += this.speed_x;
-                    else if (this.dbe_can_pass(6))
-                        this.__x += this.speed_x;
-                    else
-                        next_needs_drag_to_raster = true;
-                }
-
-                if (this.speed_x < 0.0)
-                {
-                    const gap = this.__x - this._x;
-                    if (-this.speed_x < gap)
-                        this.__x += this.speed_x;
-                    else if (this.dbe_can_pass(4))
-                        this.__x += this.speed_x;
-                    else
-                        next_needs_drag_to_raster = true;
-                }
+                const apply_speed_x_successful = this.apply_speed_x();
+                if (!apply_speed_x_successful)
+                    next_needs_drag_to_raster = true;
 
                 this.dbe_update_coordinates();
 
                 if (this.needs_drag_to_raster)
                     this.drag_to_raster();
 
-                if (this.speed_y > 0.0)
-                {
-                    const gap = this._y - this.__y;
-                    if (this.speed_y < gap)
-                        this.__y += this.speed_y;
-                    else if (this.dbe_can_pass(2))
-                        this.__y += this.speed_y;
-                    else
-                        next_needs_drag_to_raster = true;
-                }
-
-                if (this.speed_y < 0.0)
-                {
-                    const gap = this.__y - this._y;
-                    if (-this.speed_y < gap)
-                        this.__y += this.speed_y;
-                    else if (this.dbe_can_pass(8))
-                        this.__y += this.speed_y;
-                    else
-                        next_needs_drag_to_raster = true;
-                }
+                const apply_speed_y_successful = this.apply_speed_y();
+                if (!apply_speed_y_successful)
+                    next_needs_drag_to_raster = true;
 
                 this.dbe_update_coordinates();
                 this.needs_drag_to_raster = next_needs_drag_to_raster;
@@ -176,6 +140,60 @@
                     this.__x = this._x;
                 if (Math.abs(this.__y-this._y) < SPEED)
                     this.__y = this._y;
+            }
+
+            apply_speed_x ()
+            {
+                if (this.speed_x > 0.0)
+                {
+                    const gap = this._x - this.__x;
+                    if (this.speed_x < gap)
+                        this.__x += this.speed_x;
+                    else if (this.dbe_can_pass(6))
+                        this.__x += this.speed_x;
+                    else
+                        return false;
+                }
+
+                if (this.speed_x < 0.0)
+                {
+                    const gap = this.__x - this._x;
+                    if (-this.speed_x < gap)
+                        this.__x += this.speed_x;
+                    else if (this.dbe_can_pass(4))
+                        this.__x += this.speed_x;
+                    else
+                        return false;
+                }
+
+                return true;
+            }
+
+            apply_speed_y ()
+            {
+                if (this.speed_y > 0.0)
+                {
+                    const gap = this._y - this.__y;
+                    if (this.speed_y < gap)
+                        this.__y += this.speed_y;
+                    else if (this.dbe_can_pass(2))
+                        this.__y += this.speed_y;
+                    else
+                        return false;
+                }
+
+                if (this.speed_y < 0.0)
+                {
+                    const gap = this.__y - this._y;
+                    if (-this.speed_y < gap)
+                        this.__y += this.speed_y;
+                    else if (this.dbe_can_pass(8))
+                        this.__y += this.speed_y;
+                    else
+                        return false;
+                }
+
+                return true;
             }
 
             apply_min_speed ()
