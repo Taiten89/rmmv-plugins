@@ -45,6 +45,8 @@
                 this.dbe_update_coordinates();
                 this.dbe_update_nonmoving_phase();
                 this.dbe_scroll_to_front();
+                if (this.dbe_is_in_nonmoving_phase)  //  originally in updateMove
+                    this.refreshBushDepth();
             }
 
             moveByInput ()
