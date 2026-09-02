@@ -19,6 +19,7 @@
                 this.dbe_last_nonmoving_phase_x = -1;
                 this.dbe_last_nonmoving_phase_y = -1;
                 this.dbe_is_in_nonmoving_phase = false;
+                this.dbe_is_in_drag_phase = false;
             }
 
             updateMove () {}
@@ -52,10 +53,19 @@
             update (sceneActive)
             {
                 super.update(sceneActive);
+
+                if (this.dbe_is_in_drag_phase)
+                {
+                    this.dbe_speed_x = 0.0;
+                    this.dbe_speed_y = 0.0;
+                    this.dbe_needs_drag_to_raster = true;
+                }
+
                 this.dbe_modify_and_apply_speed();
                 this.dbe_update_coordinates();
                 this.dbe_update_nonmoving_phase();
                 this.dbe_scroll_to_front();
+
                 if (this.dbe_is_in_nonmoving_phase)  //  originally in updateMove
                     this.refreshBushDepth();
             }
@@ -167,6 +177,9 @@
                     this.dbe_x = this._x;
                 if (Math.abs(this.dbe_y-this._y) < SPEED)
                     this.dbe_y = this._y;
+
+                if (this.dbe_x === this._x && this.dbe_y === this._y)
+                    this.dbe_is_in_drag_phase = false;
             }
 
             dbe_apply_speed_x ()
@@ -256,5 +269,20 @@
                 }
             }
         };
-    }
+
+        globalThis.Game_Interpreter = class extends Game_Interpreter
+        {
+            update ()
+            {
+                if ($gamePlayer.dbe_is_in_drag_phase)
+                    return;
+                super.update();
+            }
+        };
+
+        DBE.commands.drag_to_raster = function ()
+        {
+            $gamePlayer.dbe_is_in_drag_phase = true;
+        };
+    }  //  analog move
 }
