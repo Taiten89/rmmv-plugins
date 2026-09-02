@@ -40,10 +40,11 @@
 
             update (sceneActive)
             {
-                this.dbe_update_move();
+                super.update(sceneActive);
+                this.dbe_modify_and_apply_speed();
+                this.dbe_update_coordinates();
                 this.dbe_update_nonmoving_phase();
                 this.dbe_scroll_to_front();
-                super.update(sceneActive);
             }
 
             moveByInput ()
@@ -86,7 +87,7 @@
                 return 0.12;
             }
 
-            dbe_update_move ()
+            dbe_modify_and_apply_speed ()
             {
                 let next_needs_drag_to_raster = false;
 
