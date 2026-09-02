@@ -22,6 +22,13 @@
             }
 
             updateMove () {}
+            updateNonmoving (wasMoving)
+            {
+                if ($gameMap.isEventRunning())
+                    return super.updateNonmoving(wasMoving);
+                wasMoving = this.dbe_is_moving();
+                return super.updateNonmoving(wasMoving);
+            }
             updateScroll (lastScrolledX, lastScrolledY) {}
             isMoving ()
             {
@@ -29,6 +36,10 @@
                     return super.isMoving();
                 if (this.dbe_is_in_nonmoving_phase)
                     return false;
+                return this.dbe_is_moving();
+            }
+            dbe_is_moving ()
+            {
                 return this.dbe_speed_x!==0.0 || this.dbe_speed_y!==0.0;
             }
             locate (x, y)
