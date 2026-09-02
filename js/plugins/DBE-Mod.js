@@ -48,6 +48,11 @@
 
             moveByInput ()
             {
+                if (this.canMove())
+                    this.dbe_moveByInput();
+            }
+            dbe_moveByInput ()
+            {
                 const direction = this.getInputDirection();
                 this.setDirection(direction);
                 if (direction === 2)
