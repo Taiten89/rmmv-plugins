@@ -256,14 +256,22 @@
 
             dbe_scroll_to_front ()
             {
-                const delta_x_pixels = (this.screenX() + this.dbe_speed_x*1300
-                    - Graphics.boxWidth / 2);
-                const delta_y_pixels = (this.screenY() + this.dbe_speed_y*1300
-                    - Graphics.boxHeight / 2);
-                const delta_x = delta_x_pixels / $gameMap.tileWidth();
-                const delta_y = delta_y_pixels / $gameMap.tileHeight();
-                $gameMap._displayX += delta_x / 16;
-                $gameMap._displayY += delta_y / 16;
+                const delta_x = this.dbe_front_display_x() - $gameMap._displayX;
+                const delta_y = this.dbe_front_display_y() - $gameMap._displayY;
+                $gameMap._displayX += delta_x / 20;
+                $gameMap._displayY += delta_y / 20;
+            }
+            dbe_front_display_x ()
+            {
+                const new_mid = this._realX + this.dbe_speed_x*30;
+                const half_box = $gameMap.screenTileX() / 2;
+                return new_mid - half_box;
+            }
+            dbe_front_display_y ()
+            {
+                const new_mid = this._realY + this.dbe_speed_y*30;
+                const half_box = $gameMap.screenTileY() / 2;
+                return new_mid - half_box;
             }
 
             dbe_update_nonmoving_phase ()
