@@ -40,7 +40,13 @@
                 wasMoving = this.dbe_is_moving();
                 return super.updateNonmoving(wasMoving);
             }
-            updateScroll (lastScrolledX, lastScrolledY) {}
+            updateScroll (lastScrolledX, lastScrolledY)
+            {
+                if ($gameMap.isEventRunning())
+                    super.updateScroll(lastScrolledX, lastScrolledY);
+                else
+                    this.dbe_scroll_to_front();
+            }
             isMoving ()
             {
                 if ($gameMap.isEventRunning())
@@ -68,7 +74,6 @@
                 this.dbe_modify_and_apply_speed();
                 this.dbe_update_coordinates();
                 this.dbe_update_nonmoving_phase();
-                this.dbe_scroll_to_front();
 
                 if (this.dbe_is_in_nonmoving_phase)  //  originally in updateMove
                     this.refreshBushDepth();
