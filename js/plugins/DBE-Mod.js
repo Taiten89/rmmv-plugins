@@ -22,7 +22,21 @@
                 this.dbe_is_in_drag_phase = false;
             }
 
-            updateMove () {}
+            forceMoveRoute (moveRoute)
+            {
+                this.dbe_speed_x = 0.0;
+                this.dbe_speed_y = 0.0;
+                this.dbe_x = this._x;
+                this.dbe_y = this._y;
+                this._realX = this._x;
+                this._realY = this._y;
+                super.forceMoveRoute(moveRoute);
+            }
+            updateMove ()
+            {
+                if (this._moveRouteForcing)
+                    super.updateMove();
+            }
             updateNonmoving (wasMoving)
             {
                 if ($gameMap.isEventRunning())
@@ -156,10 +170,18 @@
 
             dbe_update_coordinates ()
             {
-                this._x = Math.round(this.dbe_x);
-                this._y = Math.round(this.dbe_y);
-                this._realX = this.dbe_x;
-                this._realY = this.dbe_y;
+                if (this._moveRouteForcing)
+                {
+                    this.dbe_x = this._realX;
+                    this.dbe_y = this._realY;
+                }
+                else
+                {
+                    this._x = Math.round(this.dbe_x);
+                    this._y = Math.round(this.dbe_y);
+                    this._realX = this.dbe_x;
+                    this._realY = this.dbe_y;
+                }
             }
 
             dbe_drag_to_raster ()
