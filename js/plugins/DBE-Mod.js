@@ -10,8 +10,6 @@
                 this._followers._data = [];
 
                 this.dbe_F_side = 0.3 * 9.8 / 60 / 2.0;  //  assuming 2m field width
-                this.dbe_x = this._realX;
-                this.dbe_y = this._realY;
                 this.dbe_speed_x = 0.0;
                 this.dbe_speed_y = 0.0;
                 this.dbe_min_speed = 0.5 * this.dbe_F_side;
@@ -26,8 +24,6 @@
             {
                 this.dbe_speed_x = 0.0;
                 this.dbe_speed_y = 0.0;
-                this.dbe_x = this._x;
-                this.dbe_y = this._y;
                 this._realX = this._x;
                 this._realY = this._y;
                 super.forceMoveRoute(moveRoute);
@@ -56,12 +52,6 @@
             dbe_is_moving ()
             {
                 return this.dbe_speed_x!==0.0 || this.dbe_speed_y!==0.0;
-            }
-            locate (x, y)
-            {
-                this.dbe_x = x;
-                this.dbe_y = y;
-                super.locate(x, y);
             }
 
             update (sceneActive)
@@ -161,46 +151,39 @@
             dbe_can_pass (dir)
             {
                 if (dir === 2 || dir === 8)
-                    return this.canPass(Math.floor(this.dbe_x), this._y, dir) &&
-                        this.canPass(Math.ceil(this.dbe_x), this._y, dir);
+                    return this.canPass(Math.floor(this._realX), this._y, dir) &&
+                        this.canPass(Math.ceil(this._realX), this._y, dir);
                 if (dir === 4 || dir === 6)
-                    return this.canPass(this._x, Math.floor(this.dbe_y), dir) &&
-                        this.canPass(this._x, Math.ceil(this.dbe_y), dir);
+                    return this.canPass(this._x, Math.floor(this._realY), dir) &&
+                        this.canPass(this._x, Math.ceil(this._realY), dir);
             }
 
             dbe_update_coordinates ()
             {
-                if (this._moveRouteForcing)
+                if (!this._moveRouteForcing)
                 {
-                    this.dbe_x = this._realX;
-                    this.dbe_y = this._realY;
-                }
-                else
-                {
-                    this._x = Math.round(this.dbe_x);
-                    this._y = Math.round(this.dbe_y);
-                    this._realX = this.dbe_x;
-                    this._realY = this.dbe_y;
+                    this._x = Math.round(this._realX);
+                    this._y = Math.round(this._realY);
                 }
             }
 
             dbe_drag_to_raster ()
             {
                 const SPEED = 1.0 * this.dbe_F_side / 2;  //  called twice
-                if (this.dbe_x < this._x)
-                    this.dbe_x += SPEED;
-                if (this.dbe_x > this._x)
-                    this.dbe_x -= SPEED;
-                if (this.dbe_y < this._y)
-                    this.dbe_y += SPEED;
-                if (this.dbe_y > this._y)
-                    this.dbe_y -= SPEED;
-                if (Math.abs(this.dbe_x-this._x) < SPEED)
-                    this.dbe_x = this._x;
-                if (Math.abs(this.dbe_y-this._y) < SPEED)
-                    this.dbe_y = this._y;
+                if (this._realX < this._x)
+                    this._realX += SPEED;
+                if (this._realX > this._x)
+                    this._realX -= SPEED;
+                if (this._realY < this._y)
+                    this._realY += SPEED;
+                if (this._realY > this._y)
+                    this._realY -= SPEED;
+                if (Math.abs(this._realX-this._x) < SPEED)
+                    this._realX = this._x;
+                if (Math.abs(this._realY-this._y) < SPEED)
+                    this._realY = this._y;
 
-                if (this.dbe_x === this._x && this.dbe_y === this._y)
+                if (this._realX === this._x && this._realY === this._y)
                     this.dbe_is_in_drag_phase = false;
             }
 
@@ -208,22 +191,22 @@
             {
                 if (this.dbe_speed_x > 0.0)
                 {
-                    const gap = this._x - this.dbe_x;
+                    const gap = this._x - this._realX;
                     if (this.dbe_speed_x < gap)
-                        this.dbe_x += this.dbe_speed_x;
+                        this._realX += this.dbe_speed_x;
                     else if (this.dbe_can_pass(6))
-                        this.dbe_x += this.dbe_speed_x;
+                        this._realX += this.dbe_speed_x;
                     else
                         return false;
                 }
 
                 if (this.dbe_speed_x < 0.0)
                 {
-                    const gap = this.dbe_x - this._x;
+                    const gap = this._realX - this._x;
                     if (-this.dbe_speed_x < gap)
-                        this.dbe_x += this.dbe_speed_x;
+                        this._realX += this.dbe_speed_x;
                     else if (this.dbe_can_pass(4))
-                        this.dbe_x += this.dbe_speed_x;
+                        this._realX += this.dbe_speed_x;
                     else
                         return false;
                 }
@@ -235,22 +218,22 @@
             {
                 if (this.dbe_speed_y > 0.0)
                 {
-                    const gap = this._y - this.dbe_y;
+                    const gap = this._y - this._realY;
                     if (this.dbe_speed_y < gap)
-                        this.dbe_y += this.dbe_speed_y;
+                        this._realY += this.dbe_speed_y;
                     else if (this.dbe_can_pass(2))
-                        this.dbe_y += this.dbe_speed_y;
+                        this._realY += this.dbe_speed_y;
                     else
                         return false;
                 }
 
                 if (this.dbe_speed_y < 0.0)
                 {
-                    const gap = this.dbe_y - this._y;
+                    const gap = this._realY - this._y;
                     if (-this.dbe_speed_y < gap)
-                        this.dbe_y += this.dbe_speed_y;
+                        this._realY += this.dbe_speed_y;
                     else if (this.dbe_can_pass(8))
-                        this.dbe_y += this.dbe_speed_y;
+                        this._realY += this.dbe_speed_y;
                     else
                         return false;
                 }
