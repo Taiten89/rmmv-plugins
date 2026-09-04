@@ -83,16 +83,63 @@
             }
             dbe_moveByInput ()
             {
-                const direction = this.getInputDirection();
-                this.setDirection(direction);
-                if (direction === 2)
-                    this.dbe_accelerate_y(this.dbe_F_side());
-                else if (direction === 4)
-                    this.dbe_accelerate_x(-this.dbe_F_side());
-                else if (direction === 6)
-                    this.dbe_accelerate_x(+this.dbe_F_side());
-                else if (direction === 8)
-                    this.dbe_accelerate_y(-this.dbe_F_side());
+                // input vector
+                let ivx = 0.0;
+                let ivy = 0.0;
+
+                const GP_THRES = 0.1;
+                if (navigator.getGamepads && navigator.getGamepads())
+                    for (const gamepad of navigator.getGamepads())
+                        if (gamepad && gamepad.connected)
+                        {
+                            const [gp_x,gp_y] = gamepad.axes;
+                            if (Math.abs(gp_x) > GP_THRES)
+                                ivx += gp_x;
+                            if (Math.abs(gp_y) > GP_THRES)
+                                ivy += gp_y;
+                        }
+
+                // only take RPGMMV's input if there is none from any gamepad
+                if (ivx === 0.0 && ivy === 0.0)
+                {
+                    if (Input.isPressed("down"))
+                        ivy += 1.0;
+                    if (Input.isPressed("left"))
+                        ivx -= 1.0;
+                    if (Input.isPressed("right"))
+                        ivx += 1.0;
+                    if (Input.isPressed("up"))
+                        ivy -= 1.0;
+                }
+
+                const iv_length_squared = ivx**2 + ivy**2;
+                const iv_length = iv_length_squared ** 0.5;
+                const nivx = ivx / iv_length;
+                const nivy = ivy / iv_length;
+
+                if (iv_length_squared > 1.0)
+                {
+                    ivx = nivx;
+                    ivy = nivy;
+                }
+
+                if (Math.abs(nivx) > 0.5**0.5 + 0.1)
+                {
+                    if (nivx > 0)
+                        this.setDirection(6);
+                    else
+                        this.setDirection(4);
+                }
+                if (Math.abs(nivy) > 0.5**0.5 + 0.1)
+                {
+                    if (nivy > 0)
+                        this.setDirection(2);
+                    else
+                        this.setDirection(8);
+                }
+
+                this.dbe_accelerate_x(ivx * this.dbe_F_side());
+                this.dbe_accelerate_y(ivy * this.dbe_F_side());
             }
 
             dbe_F_side ()
@@ -274,7 +321,7 @@
 
             dbe_min_speed ()
             {
-                return 0.5 * this.dbe_F_side();
+                return 0.05 * this.dbe_F_side();
             }
 
             dbe_scroll_to_front ()
