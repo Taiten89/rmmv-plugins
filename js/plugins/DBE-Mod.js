@@ -258,10 +258,27 @@
 
             dbe_scroll_to_front ()
             {
-                const delta_x = this.dbe_front_display_x() - $gameMap._displayX;
-                const delta_y = this.dbe_front_display_y() - $gameMap._displayY;
-                $gameMap._displayX += delta_x / 20;
-                $gameMap._displayY += delta_y / 20;
+                let scroll_x = this.dbe_front_display_x() - $gameMap._displayX;
+                let scroll_y = this.dbe_front_display_y() - $gameMap._displayY;
+
+                // TODO: This causes trouble for very small maps
+                if (scroll_x > 0.5 * $gameMap.width())
+                    scroll_x -= $gameMap.width();
+                if (scroll_x < -0.5 * $gameMap.width())
+                    scroll_x += $gameMap.width();
+                if (scroll_y > 0.5 * $gameMap.height())
+                    scroll_y -= $gameMap.height();
+                if (scroll_y < -0.5 * $gameMap.height())
+                    scroll_y += $gameMap.height();
+
+                if (scroll_x > 0.0)
+                    $gameMap.scrollRight(scroll_x / 20);
+                if (scroll_x < 0.0)
+                    $gameMap.scrollLeft(-scroll_x / 20);
+                if (scroll_y > 0.0)
+                    $gameMap.scrollDown(scroll_y / 20);
+                if (scroll_y < 0.0)
+                    $gameMap.scrollUp(-scroll_y / 20);
             }
             dbe_front_display_x ()
             {
