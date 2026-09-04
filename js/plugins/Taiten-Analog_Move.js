@@ -1,5 +1,14 @@
 "use strict";
 
+/*:
+ * @plugindesc Taiten's Analog_Move plugin.
+ * @author Taiten - github.com/Taiten89/
+ *
+ * @help
+ * OK to use for free even in commercial projects as long as it's acknowledged
+ * in the credits or similar.
+ */
+
 globalThis.Game_Player = class extends Game_Player
 {
     initMembers ()
