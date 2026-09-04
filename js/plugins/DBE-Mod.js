@@ -151,11 +151,19 @@
             dbe_can_pass (dir)
             {
                 if (dir === 2 || dir === 8)
-                    return this.canPass(Math.floor(this._realX), this._y, dir) &&
-                        this.canPass(Math.ceil(this._realX), this._y, dir);
+                {
+                    const f = Math.floor(this._realX);
+                    const c = $gameMap.roundX(Math.ceil(this._realX));
+                    return this.canPass(f, this._y, dir) &&
+                           this.canPass(c, this._y, dir);
+                }
                 if (dir === 4 || dir === 6)
-                    return this.canPass(this._x, Math.floor(this._realY), dir) &&
-                        this.canPass(this._x, Math.ceil(this._realY), dir);
+                {
+                    const f = Math.floor(this._realY);
+                    const c = $gameMap.roundY(Math.ceil(this._realY));
+                    return this.canPass(this._x, f, dir) &&
+                           this.canPass(this._x, c, dir);
+                }
             }
 
             dbe_drag_to_raster ()
