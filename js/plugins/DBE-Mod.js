@@ -72,7 +72,6 @@
                 }
 
                 this.dbe_modify_and_apply_speed();
-                this.dbe_update_coordinates();
                 this.dbe_update_nonmoving_phase();
 
                 if (this.dbe_is_in_nonmoving_phase)  //  originally in updateMove
@@ -136,8 +135,6 @@
                     next_needs_drag_to_raster = true;
                 }
 
-                this.dbe_update_coordinates();
-
                 if (this.dbe_needs_drag_to_raster)
                     this.dbe_drag_to_raster();
 
@@ -147,8 +144,6 @@
                     this.dbe_speed_y = 0.0;
                     next_needs_drag_to_raster = true;
                 }
-
-                this.dbe_update_coordinates();
 
                 this.dbe_needs_drag_to_raster = next_needs_drag_to_raster;
             }
@@ -161,15 +156,6 @@
                 if (dir === 4 || dir === 6)
                     return this.canPass(this._x, Math.floor(this._realY), dir) &&
                         this.canPass(this._x, Math.ceil(this._realY), dir);
-            }
-
-            dbe_update_coordinates ()
-            {
-                if (!this._moveRouteForcing)
-                {
-                    this._x = Math.round(this._realX);
-                    this._y = Math.round(this._realY);
-                }
             }
 
             dbe_drag_to_raster ()
@@ -194,6 +180,9 @@
 
             dbe_apply_speed_x ()
             {
+                if (this.isMoveRouteForcing())
+                    return true;
+
                 if (this.dbe_speed_x > 0.0)
                 {
                     const gap = this._x - this._realX;
@@ -216,11 +205,19 @@
                         return false;
                 }
 
+                const wn = Math.round(this._realX);
+                const p_n_gap = wn - this._realX;
+                this._x = $gameMap.roundX(wn);
+                this._realX = this._x - p_n_gap;
+
                 return true;
             }
 
             dbe_apply_speed_y ()
             {
+                if (this.isMoveRouteForcing())
+                    return true;
+
                 if (this.dbe_speed_y > 0.0)
                 {
                     const gap = this._y - this._realY;
@@ -242,6 +239,11 @@
                     else
                         return false;
                 }
+
+                const wn = Math.round(this._realY);
+                const p_n_gap = wn - this._realY;
+                this._y = $gameMap.roundY(wn);
+                this._realY = this._y - p_n_gap;
 
                 return true;
             }
