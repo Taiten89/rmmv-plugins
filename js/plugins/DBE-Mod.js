@@ -9,10 +9,8 @@
                 super.initMembers();
                 this._followers._data = [];
 
-                this.dbe_F_side = 0.3 * 9.8 / 60 / 2.0;  //  assuming 2m field width
                 this.dbe_speed_x = 0.0;
                 this.dbe_speed_y = 0.0;
-                this.dbe_min_speed = 0.5 * this.dbe_F_side;
                 this.dbe_needs_drag_to_raster = false;
                 this.dbe_last_nonmoving_phase_x = -1;
                 this.dbe_last_nonmoving_phase_y = -1;
@@ -88,13 +86,19 @@
                 const direction = this.getInputDirection();
                 this.setDirection(direction);
                 if (direction === 2)
-                    this.dbe_accelerate_y(this.dbe_F_side);
+                    this.dbe_accelerate_y(this.dbe_F_side());
                 else if (direction === 4)
-                    this.dbe_accelerate_x(-this.dbe_F_side);
+                    this.dbe_accelerate_x(-this.dbe_F_side());
                 else if (direction === 6)
-                    this.dbe_accelerate_x(+this.dbe_F_side);
+                    this.dbe_accelerate_x(+this.dbe_F_side());
                 else if (direction === 8)
-                    this.dbe_accelerate_y(-this.dbe_F_side);
+                    this.dbe_accelerate_y(-this.dbe_F_side());
+            }
+
+            dbe_F_side ()
+            {
+                // assuming 2m field width
+                return 0.3 * 9.8 / 60 / 2.0;
             }
 
             dbe_accelerate_x (force)
@@ -168,7 +172,7 @@
 
             dbe_drag_to_raster ()
             {
-                const SPEED = 1.0 * this.dbe_F_side / 2;  //  called twice
+                const SPEED = 1.0 * this.dbe_F_side() / 2;  //  called twice
                 if (this._realX < this._x)
                     this._realX += SPEED;
                 if (this._realX > this._x)
@@ -258,10 +262,15 @@
 
             dbe_apply_min_speed ()
             {
-                if (Math.abs(this.dbe_speed_x) < this.dbe_min_speed)
+                if (Math.abs(this.dbe_speed_x) < this.dbe_min_speed())
                     this.dbe_speed_x = 0.0;
-                if (Math.abs(this.dbe_speed_y) < this.dbe_min_speed)
+                if (Math.abs(this.dbe_speed_y) < this.dbe_min_speed())
                     this.dbe_speed_y = 0.0;
+            }
+
+            dbe_min_speed ()
+            {
+                return 0.5 * this.dbe_F_side();
             }
 
             dbe_scroll_to_front ()
