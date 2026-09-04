@@ -291,14 +291,12 @@
             dbe_front_display_x ()
             {
                 const new_mid = this._realX + this.dbe_speed_x*30;
-                const half_box = $gameMap.screenTileX() / 2;
-                return new_mid - half_box;
+                return new_mid - $gamePlayer.centerX();
             }
             dbe_front_display_y ()
             {
                 const new_mid = this._realY + this.dbe_speed_y*30;
-                const half_box = $gameMap.screenTileY() / 2;
-                return new_mid - half_box;
+                return new_mid - $gamePlayer.centerY();
             }
 
             dbe_update_nonmoving_phase ()
