@@ -135,6 +135,8 @@
                 const apply_speed_x_successful = this.dbe_apply_speed_x();
                 if (!apply_speed_x_successful)
                 {
+                    if ([4,6].includes(this.direction()))
+                        this.checkEventTriggerTouchFront(this.direction());
                     this.dbe_speed_x = 0.0;
                     next_needs_drag_to_raster = true;
                 }
@@ -145,6 +147,8 @@
                 const apply_speed_y_successful = this.dbe_apply_speed_y();
                 if (!apply_speed_y_successful)
                 {
+                    if ([2,8].includes(this.direction()))
+                        this.checkEventTriggerTouchFront(this.direction());
                     this.dbe_speed_y = 0.0;
                     next_needs_drag_to_raster = true;
                 }
