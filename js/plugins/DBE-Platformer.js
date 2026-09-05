@@ -76,13 +76,8 @@ class extends Base
     initMembers ()
     {
         super.initMembers();
-        //this._followers._data = []  //  without SAN_AnalogMove
 
         this.is_initted = false;
-        this.__x = this._realX;
-        this.__y = this._realY;
-        this.speed_x = 0.0;
-        this.speed_y = 0.0;
         this.jump_remaining = 0;
         this.is_jump_triggered = false;
         this.is_on_ground = false;
@@ -109,16 +104,6 @@ class extends Base
         }
     }
 
-    moveByInput () {}
-    //updateMove () {}  //  without SAN_AnalogMove
-    updateAnalogMove () {}  //  with SAN_AnalogMove
-    //updateScroll (lastScrolledX, lastScrolledY) {}  //  without SAN_AnalogMove
-    isMoving ()
-    {
-        if (!this.is_on_ground)
-            return true;
-        return Math.abs(this.speed_x)>0.001;
-    }
     hasWalkAnime ()
     {
         if (!this.is_on_ground)
@@ -127,20 +112,8 @@ class extends Base
     }
     locate (x, y)
     {
-        this.__x = x;
-        this.__y = y;
         super.locate(x, y);
         this.update_is_on_ground();
-    }
-
-    update (sceneActive)
-    {
-        this.dbe_move_by_input();
-        this.dbe_update_move();
-        if (this.canMove())
-            this.dbe_scroll_to_front();
-        this.updateAnimation();
-        super.update(sceneActive);
     }
 
     setDirection (dir)
@@ -150,7 +123,7 @@ class extends Base
         super.setDirection(dir);
     }
 
-    dbe_move_by_input ()
+    taiten_moveByInput ()
     {
         if (Input.isTriggered(DBE.platformer.JUMP_INPUT))
             this.is_jump_triggered = true;
@@ -169,24 +142,26 @@ class extends Base
         }
     }
 
+    taiten_apply_ground_resistance () {}
+
     dbe_move_by_direction_input ()
     {
         const direction = this.getInputDirection();
         if (this.is_on_ground)
         {
             if (direction === 4)
-                this.accelerate_x(-this.F_side);
+                this.taiten_accelerate_x(-this.F_side);
             else if (direction === 6)
-                this.accelerate_x(+this.F_side);
+                this.taiten_accelerate_x(+this.F_side);
             else
                 this.brake_x();
         }
         else
         {
             if (direction === 4)
-                this.accelerate_x(-this.F_side / 4);
+                this.taiten_accelerate_x(-this.F_side / 4);
             else if (direction === 6)
-                this.accelerate_x(+this.F_side / 4);
+                this.taiten_accelerate_x(+this.F_side / 4);
         }
     }
 
@@ -199,30 +174,20 @@ class extends Base
         }
     }
 
-    accelerate_x (force)
-    {
-        this.speed_x += force;
-    }
-
-    accelerate_y (force)
-    {
-        this.speed_y += force;
-    }
-
     brake_x ()
     {
-        this.speed_x *= 0.75;
+        this.taiten_speed_x *= 0.75;
     }
 
     apply_wind_resistance ()
     {
-        this.speed_x *= 1.0 - 1.0 / 64.0;
-        this.speed_y *= 1.0 - 1.0 / 64.0;
+        this.taiten_speed_x *= 1.0 - 1.0 / 64.0;
+        this.taiten_speed_y *= 1.0 - 1.0 / 64.0;
     }
 
     apply_ground_resistance ()
     {
-        this.speed_x *= 1.0 - 1.0 / 32.0;
+        this.taiten_speed_x *= 1.0 - 1.0 / 32.0;
     }
 
     update_is_on_ground ()
@@ -232,13 +197,13 @@ class extends Base
         this.is_on_ground = !can_pass && !has_gap;
     }
 
-    dbe_update_move ()
+    taiten_modify_and_apply_speed ()
     {
-        this.accelerate_y(this.G);
+        this.taiten_accelerate_y(this.G);
 
         if (this.jump_remaining)
         {
-            this.accelerate_y(-this.F_jump);
+            this.taiten_accelerate_y(-this.F_jump);
             this.jump_remaining--;
         }
 
@@ -246,87 +211,9 @@ class extends Base
         if (this.is_on_ground)
             this.apply_ground_resistance();
 
-        if (this.speed_x > 0.0)
-        {
-            const gap = this._x - this.__x;
-            if (this.speed_x < gap)
-                this.__x += this.speed_x;
-            else if (this.canPass(this._x, this._y, 6))
-                this.__x += this.speed_x;
-            else
-            {
-                this.__x = this._x;
-                this.speed_x = 0.0;
-            }
-        }
+        super.taiten_modify_and_apply_speed();
 
-        if (this.speed_x < 0.0)
-        {
-            const gap = this.__x - this._x;
-            if (-this.speed_x < gap)
-                this.__x += this.speed_x;
-            else if (this.canPass(this._x, this._y, 4))
-                this.__x += this.speed_x;
-            else
-            {
-                this.__x = this._x;
-                this.speed_x = 0.0;
-            }
-        }
-
-        this.dbe_update_coordinates();
         this.update_is_on_ground();
-
-        if (this.speed_y > 0.0)
-        {
-            const gap = this._y - this.__y;
-            if (this.speed_y < gap)
-                this.__y += this.speed_y;
-            else if (this.canPass(this._x, this._y, 2))
-                this.__y += this.speed_y;
-            else
-            {
-                this.__y = this._y;
-                this.speed_y = 0.0;
-            }
-        }
-
-        if (this.speed_y < 0.0)
-        {
-            const gap = this.__y - this._y;
-            if (-this.speed_y < gap)
-                this.__y += this.speed_y;
-            else if (this.canPass(this._x, this._y, 8))
-                this.__y += this.speed_y;
-            else
-            {
-                this.__y = this._y;
-                this.speed_y = 0.0;
-            }
-        }
-
-        this.dbe_update_coordinates();
-        this.update_is_on_ground();
-    }
-
-    dbe_update_coordinates ()
-    {
-        this._x = Math.round(this.__x);
-        this._y = Math.round(this.__y);
-        this._realX = this.__x;
-        this._realY = this.__y;
-    }
-
-    dbe_scroll_to_front ()
-    {
-        const delta_x_pixels = (this.screenX() + this.speed_x*500
-            - Graphics.boxWidth / 2);
-        const delta_y_pixels = (this.screenY() + this.speed_y*500
-            - Graphics.boxHeight / 2);
-        const delta_x = delta_x_pixels / $gameMap.tileWidth();
-        const delta_y = delta_y_pixels / $gameMap.tileHeight();
-        $gameMap._displayX += delta_x / 8;
-        $gameMap._displayY += delta_y / 8;
     }
 };
 
