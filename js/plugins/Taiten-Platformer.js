@@ -32,7 +32,7 @@ Taiten.platformer =
         G: 9.8 / 60 / 2 / 4,  // assuming 2m field height; /4 because slower is more fun
         F_side: 0.3 * 9.8 / 60 / 2,
         F_jump: 0.075,
-        jump_max: Math.round(0.12 * 60),
+        jump_max: Math.round(0.13 * 60),
     },
 };
 
