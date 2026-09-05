@@ -1,5 +1,7 @@
 "use strict";
 
+// TODO: remove / change hacks
+
 DBE.commands.platformer_start = function (mapId_str, x_str, y_str)
 {
     DBE.platformer.is_active = true;
@@ -144,9 +146,36 @@ class extends Base
 
     taiten_apply_ground_resistance () {}
 
+    taiten_apply_speed_x ()
+    {
+        const super_result = super.taiten_apply_speed_x();
+        if (!super_result)
+        {
+            this.taiten_speed_x = 0.0;
+            this._realX = this._x;
+        }
+        // hack: discard super result;
+        // drag-to-raster won't be provoked
+        return true;
+    }
+
+    taiten_apply_speed_y ()
+    {
+        const super_result = super.taiten_apply_speed_y();
+        if (!super_result)
+        {
+            this.taiten_speed_y = 0.0;
+            this._realY = this._y;
+        }
+        // hack: discard super result;
+        // drag-to-raster won't be provoked
+        return true;
+    }
+
     dbe_move_by_direction_input ()
     {
         const direction = this.getInputDirection();
+        this.setDirection(direction);
         if (this.is_on_ground)
         {
             if (direction === 4)
