@@ -394,7 +394,7 @@ globalThis.Game_Interpreter = class extends Game_Interpreter
     {
         if (command === 'drag-to-raster')
             $gamePlayer.taiten_is_in_drag_phase = true;
-        else
-            super.pluginCommand(command, args);
+
+        super.pluginCommand(command, args);
     }
 };
