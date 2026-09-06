@@ -24,6 +24,20 @@ globalThis.Game_Player = class extends Game_Player
         this.taiten_is_in_drag_phase = false;
     }
 
+    constructor ()
+    {
+        super(...arguments);
+
+        // fixes saving games
+        Object.defineProperty(
+            this.constructor,
+            'name',
+            {
+                get: () => 'Game_Player'
+            }
+        );
+    }
+
     forceMoveRoute (moveRoute)
     {
         this.taiten_speed_x = 0.0;
@@ -383,6 +397,20 @@ globalThis.Game_Player = class extends Game_Player
 
 globalThis.Game_Interpreter = class extends Game_Interpreter
 {
+    constructor ()
+    {
+        super(...arguments);
+
+        // fixes saving games
+        Object.defineProperty(
+            this.constructor,
+            'name',
+            {
+                get: () => 'Game_Interpreter'
+            }
+        );
+    }
+
     update ()
     {
         if ($gamePlayer.taiten_is_in_drag_phase)
