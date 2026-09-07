@@ -36,18 +36,21 @@ Taiten.platformer =
     },
 };
 
-globalThis.Game_Interpreter = class extends Game_Interpreter
+Taiten.Platformer_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Taiten.Platformer_Game_Interpreter = class
 {
     pluginCommand (command, args)
     {
+        const super_func = Taiten.Platformer_Game_Interpreter_pluginCommand;
+
         if (command === 'start-platformer')
             Taiten.platformer.start(...args);
         if (command === 'stop-platformer')
             Taiten.platformer.stop();
-
-        super.pluginCommand(command, args);
+        super_func.call(this, command, args);
     }
 };
+Game_Interpreter.prototype.pluginCommand = Taiten.Platformer_Game_Interpreter.prototype.pluginCommand;
 
 Taiten.platformer.start = function (mapId_str, x_str, y_str)
 {
@@ -275,12 +278,14 @@ class extends Base
 };
 
 {  //  stop minigame instead of menu
-    const super_callMenu = Scene_Map.prototype.callMenu;
+    Taiten.Platformer_Scene_Map_callMenu = Scene_Map.prototype.callMenu;
     Scene_Map.prototype.callMenu = function ()
     {
+        const super_func = Taiten.Platformer_Scene_Map_callMenu;
+
         if (Taiten.platformer.is_active)
             Taiten.platformer.stop();
         else
-            super_callMenu.call(this);
+            super_func.call(this);
     };
 }

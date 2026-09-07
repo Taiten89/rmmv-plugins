@@ -9,11 +9,22 @@
  * in the credits or similar.
  */
 
-globalThis.Game_Player = class extends Game_Player
+globalThis.Taiten = globalThis.Taiten || {};
+
+Taiten.Analog_Move_Game_Player_initMembers = Game_Player.prototype.initMembers;
+Taiten.Analog_Move_Game_Player_forceMoveRoute = Game_Player.prototype.forceMoveRoute;
+Taiten.Analog_Move_Game_Player_updateMove = Game_Player.prototype.updateMove;
+Taiten.Analog_Move_Game_Player_updateNonmoving = Game_Player.prototype.updateNonmoving;
+Taiten.Analog_Move_Game_Player_updateScroll = Game_Player.prototype.updateScroll;
+Taiten.Analog_Move_Game_Player_isMoving = Game_Player.prototype.isMoving;
+Taiten.Analog_Move_Game_Player_update = Game_Player.prototype.update;
+
+Taiten.Analog_Move_Game_Player = class
 {
     initMembers ()
     {
-        super.initMembers();
+        const super_func = Taiten.Analog_Move_Game_Player_initMembers;
+        super_func.call(this);
 
         this.taiten_speed_x = 0.0;
         this.taiten_speed_y = 0.0;
@@ -24,51 +35,47 @@ globalThis.Game_Player = class extends Game_Player
         this.taiten_is_in_drag_phase = false;
     }
 
-    constructor ()
-    {
-        super(...arguments);
-
-        // fixes saving games
-        Object.defineProperty(
-            this.constructor,
-            'name',
-            {
-                get: () => 'Game_Player'
-            }
-        );
-    }
-
     forceMoveRoute (moveRoute)
     {
+        const super_func = Taiten.Analog_Move_Game_Player_forceMoveRoute;
+
         this.taiten_speed_x = 0.0;
         this.taiten_speed_y = 0.0;
         this._realX = this._x;
         this._realY = this._y;
-        super.forceMoveRoute(moveRoute);
+        super_func.call(this, moveRoute);
     }
     updateMove ()
     {
+        const super_func = Taiten.Analog_Move_Game_Player_updateMove;
+
         if (this._moveRouteForcing)
-            super.updateMove();
+            super_func.call(this);
     }
     updateNonmoving (wasMoving)
     {
+        const super_func = Taiten.Analog_Move_Game_Player_updateNonmoving;
+
         if ($gameMap.isEventRunning())
-            return super.updateNonmoving(wasMoving);
+            return super_func.call(this, wasMoving);
         wasMoving = this.taiten_is_moving();
-        return super.updateNonmoving(wasMoving);
+        return super_func.call(this, wasMoving);
     }
     updateScroll (lastScrolledX, lastScrolledY)
     {
+        const super_func = Taiten.Analog_Move_Game_Player_updateScroll;
+
         if ($gameMap.isEventRunning())
-            super.updateScroll(lastScrolledX, lastScrolledY);
+            super_func.call(this, lastScrolledX, lastScrolledY);
         else
             this.taiten_scroll_to_front();
     }
     isMoving ()
     {
+        const super_func = Taiten.Analog_Move_Game_Player_isMoving;
+
         if ($gameMap.isEventRunning())
-            return super.isMoving();
+            return super_func.call(this);
         if (this.taiten_is_in_nonmoving_phase)
             return false;
         return this.taiten_is_moving();
@@ -80,7 +87,8 @@ globalThis.Game_Player = class extends Game_Player
 
     update (sceneActive)
     {
-        super.update(sceneActive);
+        const super_func = Taiten.Analog_Move_Game_Player_update;
+        super_func.call(this, sceneActive);
 
         if (this.taiten_is_in_drag_phase)
         {
@@ -395,34 +403,56 @@ globalThis.Game_Player = class extends Game_Player
     }
 };
 
-globalThis.Game_Interpreter = class extends Game_Interpreter
+Game_Player.prototype.initMembers = Taiten.Analog_Move_Game_Player.prototype.initMembers;
+Game_Player.prototype.forceMoveRoute = Taiten.Analog_Move_Game_Player.prototype.forceMoveRoute;
+Game_Player.prototype.updateMove = Taiten.Analog_Move_Game_Player.prototype.updateMove;
+Game_Player.prototype.updateNonmoving = Taiten.Analog_Move_Game_Player.prototype.updateNonmoving;
+Game_Player.prototype.updateScroll = Taiten.Analog_Move_Game_Player.prototype.updateScroll;
+Game_Player.prototype.isMoving = Taiten.Analog_Move_Game_Player.prototype.isMoving;
+Game_Player.prototype.taiten_is_moving = Taiten.Analog_Move_Game_Player.prototype.taiten_is_moving;
+Game_Player.prototype.update = Taiten.Analog_Move_Game_Player.prototype.update;
+Game_Player.prototype.moveByInput = Taiten.Analog_Move_Game_Player.prototype.moveByInput;
+Game_Player.prototype.taiten_moveByInput = Taiten.Analog_Move_Game_Player.prototype.taiten_moveByInput;
+Game_Player.prototype.taiten_F_side = Taiten.Analog_Move_Game_Player.prototype.taiten_F_side;
+Game_Player.prototype.taiten_accelerate_x = Taiten.Analog_Move_Game_Player.prototype.taiten_accelerate_x;
+Game_Player.prototype.taiten_accelerate_y = Taiten.Analog_Move_Game_Player.prototype.taiten_accelerate_y;
+Game_Player.prototype.taiten_apply_ground_resistance = Taiten.Analog_Move_Game_Player.prototype.taiten_apply_ground_resistance;
+Game_Player.prototype.taiten_ground_resistance = Taiten.Analog_Move_Game_Player.prototype.taiten_ground_resistance;
+Game_Player.prototype.taiten_modify_and_apply_speed = Taiten.Analog_Move_Game_Player.prototype.taiten_modify_and_apply_speed;
+Game_Player.prototype.taiten_can_pass = Taiten.Analog_Move_Game_Player.prototype.taiten_can_pass;
+Game_Player.prototype.taiten_drag_to_raster = Taiten.Analog_Move_Game_Player.prototype.taiten_drag_to_raster;
+Game_Player.prototype.taiten_apply_speed_x = Taiten.Analog_Move_Game_Player.prototype.taiten_apply_speed_x;
+Game_Player.prototype.taiten_apply_speed_y = Taiten.Analog_Move_Game_Player.prototype.taiten_apply_speed_y;
+Game_Player.prototype.taiten_apply_min_speed = Taiten.Analog_Move_Game_Player.prototype.taiten_apply_min_speed;
+Game_Player.prototype.taiten_min_speed = Taiten.Analog_Move_Game_Player.prototype.taiten_min_speed;
+Game_Player.prototype.taiten_scroll_to_front = Taiten.Analog_Move_Game_Player.prototype.taiten_scroll_to_front;
+Game_Player.prototype.taiten_front_display_x = Taiten.Analog_Move_Game_Player.prototype.taiten_front_display_x;
+Game_Player.prototype.taiten_front_display_y = Taiten.Analog_Move_Game_Player.prototype.taiten_front_display_y;
+Game_Player.prototype.taiten_update_nonmoving_phase = Taiten.Analog_Move_Game_Player.prototype.taiten_update_nonmoving_phase;
+
+Taiten.Analog_Move_Game_Interpreter_update = Game_Interpreter.prototype.update;
+Taiten.Analog_Move_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+
+Taiten.Analog_Move_Game_Interpreter = class
 {
-    constructor ()
-    {
-        super(...arguments);
-
-        // fixes saving games
-        Object.defineProperty(
-            this.constructor,
-            'name',
-            {
-                get: () => 'Game_Interpreter'
-            }
-        );
-    }
-
     update ()
     {
+        const super_func = Taiten.Analog_Move_Game_Interpreter_update;
+
         if ($gamePlayer.taiten_is_in_drag_phase)
             return;
-        super.update();
+        super_func.call(this);
     }
 
     pluginCommand (command, args)
     {
+        const super_func = Taiten.Analog_Move_Game_Interpreter_pluginCommand;
+
         if (command === 'drag-to-raster')
             $gamePlayer.taiten_is_in_drag_phase = true;
-
-        super.pluginCommand(command, args);
+        super_func.call(this, command, args);
     }
 };
+
+Game_Interpreter.prototype.update = Taiten.Analog_Move_Game_Interpreter.prototype.update;
+Game_Interpreter.prototype.pluginCommand = Taiten.Analog_Move_Game_Interpreter.prototype.pluginCommand;
