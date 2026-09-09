@@ -8,8 +8,6 @@
  * OK to use for free even in commercial projects as long as it's acknowledged
  * in the credits or similar.
  *
- * Requires Taiten-Analog_Move (has the same conditions as this one).
- *
  * Annotate any target events with <arcade_shooter-target:123>
  * (replace "123" with their HP).
  * Self-Switch A is set to ON once they are defeated.
@@ -27,7 +25,7 @@ globalThis.Taiten = globalThis.Taiten || {};
 
 Taiten.arcade_shooter =
 {
-    shot_picture: PluginManager.parameters('Taiten-Arcade_Shooter').shot_picture,
+    SHOT_PICTURE: PluginManager.parameters('Taiten-Arcade_Shooter').shot_picture,
     SHOOT_INPUT: 'ok',
     is_active: false,
     last_picture_id: 100,
@@ -171,7 +169,7 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
         if (Taiten.arcade_shooter.last_picture_id === 50)
             Taiten.arcade_shooter.last_picture_id = 99;
         this.picture_id = Taiten.arcade_shooter.last_picture_id;
-        const name = Taiten.arcade_shooter.shot_picture;
+        const name = Taiten.arcade_shooter.SHOT_PICTURE;
         $gameScreen.showPicture(this.picture_id, name, 0, -1, -1,
                                 100, 100, 255, 0);
     }
@@ -183,7 +181,6 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
 
     fire () {
         this.state = 'shooting';
-        this.orig_y = this._realY;
     }
 
     update () {
