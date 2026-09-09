@@ -248,9 +248,9 @@ class extends Base
     super_performTransfer () {
         super.performTransfer();
     }
-    update () {
+    update (sceneActive) {
         this.arcade_shooter.update();
-        super.update();
+        super.update(sceneActive);
     }
 };
 
