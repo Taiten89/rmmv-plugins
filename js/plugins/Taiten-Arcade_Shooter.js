@@ -110,6 +110,8 @@ Taiten.arcade_shooter.Shooter = class
 
         this.is_initted = false;
         this.shots = [];
+        this.hits = [];
+        this.target_hp = {};
 
         for (const k in Taiten.arcade_shooter.defaults)
             this[k] = Taiten.arcade_shooter.defaults[k];
@@ -125,6 +127,33 @@ Taiten.arcade_shooter.Shooter = class
             }
 
         this.shots.push(shot);
+    }
+
+    hit (event, power) {
+        let hp = -1;
+        if (event.eventId() in this.target_hp)
+            hp = this.target_hp[event.eventId()];
+        else {
+            hp = Number(event.event().meta['arcade_shooter-target']);
+            this.target_hp[event.eventId()] = hp;
+        }
+        this.target_hp[event.eventId()] -= power;
+
+        if (this.target_hp[event.eventId()] <= 0) {
+            const key = [$gameMap.mapId(), event.eventId(), 'A'];
+            $gameSelfSwitches.setValue(key, true);
+            hp = Number(event.event().meta['arcade_shooter-target']);
+            this.target_hp[event.eventId()] = hp;
+            return;
+        }
+
+        const hit = new Taiten.arcade_shooter.Hit(event, power);
+        for (let i=0; i<this.hits.length; i++)
+            if (this.hits[i].state === 'destructed') {
+                this.hits[i] = hit;
+                return;
+            }
+        this.hits.push(hit);
     }
 
     perform_transfer () {
@@ -146,6 +175,8 @@ Taiten.arcade_shooter.Shooter = class
             this.update_input();
         for (const shot of this.shots)
             shot.update();
+        for (const hit of this.hits)
+            hit.update();
     }
 
     update_input () {
@@ -203,6 +234,11 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
             this.fire();
     }
     update_shoot () {
+        if (this.update_hits()) {
+            this.destruct();
+            return;
+        }
+
         this._realY -= 0.3;
         this.range_remaining -= 0.3;
         if (this.range_remaining < 0.0) {
@@ -219,6 +255,21 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
         this._realX = _x - x_pn_gap;
         this._realY = _y - y_pn_gap;
     }
+    update_hits () {
+        const x = Math.round(this._realX);
+        const __y = Math.round(this._realY) - 1;
+        const y = $gameMap.roundY(__y);
+        for (const ev of $gameMap.eventsXy(x, y)) {
+            const key = [$gameMap.mapId(), ev.eventId(), 'A'];
+            const a = !$gameSelfSwitches.value(key);
+            const b = 'arcade_shooter-target' in ev.event().meta;
+            if (a && b) {
+                this._.hit(ev, this.power);
+                return true;
+            }
+        }
+        return false;
+    }
 
     move_picture () {
         const rel_power = this.power / this._.max_shot_power;
@@ -227,6 +278,34 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
         const scaleXY = Math.round(rel_power * 100);
         $gameScreen.movePicture(this.picture_id, 1, x, y, scaleXY,
                                 scaleXY, 255, 0, 1);
+    }
+};
+
+Taiten.arcade_shooter.Hit = class
+{
+    constructor (event, power) {
+        this.event = event;
+        this.state = 'gleaming';
+        this.gleam_remaining = power;
+    }
+
+    destruct () {
+        this.state = 'destructed';
+    }
+
+    update () {
+        if (this.state === 'gleaming')
+            this.update_gleam();
+    }
+    update_gleam () {
+        if (this.gleam_remaining % 3 === 0)
+            this.event.setBlendMode(1);
+        else
+            this.event.setBlendMode(0);
+
+        this.gleam_remaining--;
+        if (this.gleam_remaining === 0)
+            this.destruct();
     }
 };
 
