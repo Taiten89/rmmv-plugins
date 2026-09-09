@@ -17,7 +17,6 @@
  *
  * @param shot_picture
  * @desc The "name" of the pictures that appear to be the shots fired.
- *       Should have the same width as the tiles; the height can differ.
  * @type string
  */
 
@@ -223,10 +222,10 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
 
     move_picture () {
         const rel_power = this.power / this._.max_shot_power;
-        const x = this.screenX() - $gameMap.tileWidth() * rel_power / 2;
+        const x = this.screenX();
         const y = this.screenY();
         const scaleXY = Math.round(rel_power * 100);
-        $gameScreen.movePicture(this.picture_id, 0, x, y, scaleXY,
+        $gameScreen.movePicture(this.picture_id, 1, x, y, scaleXY,
                                 scaleXY, 255, 0, 1);
     }
 };
