@@ -75,6 +75,8 @@ Taiten.arcade_shooter.stop = function ()
 {
     Taiten.arcade_shooter.is_active = false;
 
+    $gamePlayer.arcade_shooter.destruct();
+
     AudioManager.playBgm(Taiten.arcade_shooter.orig_bgm, Taiten.arcade_shooter.orig_bgm.pos);
     AudioManager.playBgs(Taiten.arcade_shooter.orig_bgs);
     Taiten.arcade_shooter.orig_bgm = {};
@@ -115,6 +117,12 @@ Taiten.arcade_shooter.Shooter = class
 
         for (const k in Taiten.arcade_shooter.defaults)
             this[k] = Taiten.arcade_shooter.defaults[k];
+    }
+
+    destruct () {
+        for (const shot of this.shots)
+            if (shot.state !== 'destructed')
+                shot.destruct();
     }
 
     shoot () {
