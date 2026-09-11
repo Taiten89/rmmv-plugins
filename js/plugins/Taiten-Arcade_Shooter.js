@@ -20,6 +20,11 @@
  * @desc The "name" of the pictures that appear to be the shots fired.
  * @dir img/pictures/
  * @type file
+ *
+ * @param shot_blockers
+ * @desc The Region IDs that block shots.
+ * @type number[]
+ * @default []
  */
 
 globalThis.Taiten = globalThis.Taiten || {};
@@ -27,6 +32,7 @@ globalThis.Taiten = globalThis.Taiten || {};
 Taiten.arcade_shooter =
 {
     SHOT_PICTURE: PluginManager.parameters('Taiten-Arcade_Shooter').shot_picture,
+    SHOT_BLOCKERS: {},
     SHOOT_INPUT: 'ok',
     is_active: false,
     last_picture_id: 100,
@@ -42,6 +48,14 @@ Taiten.arcade_shooter =
         range: 20,
     },
 };
+
+{  //  set shot blockers
+const region_json = PluginManager.parameters('Taiten-Arcade_Shooter').shot_blockers;
+const region_strs = JSON.parse(region_json);
+for (const region_str of region_strs)
+    // js converts integers to strings when accessing these later
+    Taiten.arcade_shooter.SHOT_BLOCKERS[region_str] = true;
+}
 
 Taiten.Arcade_Shooter_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function (command, args) {
@@ -277,6 +291,10 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
         const _y = $gameMap.roundY(__y);
         this._realX = _x - x_pn_gap;
         this._realY = _y - y_pn_gap;
+
+        const region_id = $gameMap.regionId(_x, _y);
+        if (Taiten.arcade_shooter.SHOT_BLOCKERS[region_id])
+            this.destruct();
     }
     update_hits () {
         const x = Math.round(this._realX);
