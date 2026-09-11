@@ -18,7 +18,8 @@
  *
  * @param shot_picture
  * @desc The "name" of the pictures that appear to be the shots fired.
- * @type string
+ * @dir img/pictures/
+ * @type file
  */
 
 globalThis.Taiten = globalThis.Taiten || {};
