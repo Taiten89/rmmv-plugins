@@ -175,14 +175,6 @@ Taiten.arcade_shooter.Shooter = class
         }
         this.target_hp[event.eventId()] -= power;
 
-        if (this.target_hp[event.eventId()] <= 0) {
-            const key = [$gameMap.mapId(), event.eventId(), 'A'];
-            $gameSelfSwitches.setValue(key, true);
-            hp = Number(event.event().meta['arcade_shooter-target']);
-            this.target_hp[event.eventId()] = hp;
-            return;
-        }
-
         const hit = new Taiten.arcade_shooter.Hit(event, power);
         for (let i=0; i<this.hits.length; i++)
             if (this.hits[i].state === 'destructed') {
@@ -214,11 +206,37 @@ Taiten.arcade_shooter.Shooter = class
             shot.update();
         for (const hit of this.hits)
             hit.update();
+        this.update_kills();
     }
 
     update_input () {
         if (Input.isTriggered(Taiten.arcade_shooter.SHOOT_INPUT))
             this.shoot();
+    }
+
+    update_kills () {
+        for (const [event_id_str,hp] of Object.entries(this.target_hp)) {
+            const event_id = Number(event_id_str);
+            if (hp <= 0) {
+                if (this.is_event_gleaming(event_id))
+                    continue;
+                const key = [$gameMap.mapId(), event_id, 'A'];
+                $gameSelfSwitches.setValue(key, true);
+                const event = $gameMap.event(event_id);
+                const new_hp = Number(event.event().meta['arcade_shooter-target']);
+                this.target_hp[event_id] = new_hp;
+            }
+        }
+    }
+
+    is_event_gleaming (event_id) {
+        for (const hit of this.hits) {
+            const a = event_id === hit.event.eventId();
+            const b = hit.state === 'gleaming';
+            if (a && b)
+                return true;
+        }
+        return false;
     }
 };
 
