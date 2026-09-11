@@ -11,6 +11,7 @@
  * Annotate any target events with <arcade_shooter-target:123>
  * (replace "123" with their HP).
  * Self-Switch A is set to ON once they are defeated.
+ * Self-Switch A is also set to OFF in them once Arcade_Shooter is started.
  * Commands:
  *   start-arcade_shooter mapId x y
  *   stop-arcade_shooter
@@ -105,6 +106,18 @@ Taiten.arcade_shooter.unstore_orig = function ()
     Taiten.arcade_shooter.orig_player = null;
 };
 
+Taiten.arcade_shooter.reset_self_switches = function ()
+{
+    for (const ev of $gameMap.events()) {
+        if (ev._erased)
+            continue;
+        if (! ('arcade_shooter-target' in ev.event().meta))
+            continue;
+        const key = [$gameMap.mapId(), ev.eventId(), 'A'];
+        $gameSelfSwitches.setValue(key, false);
+    }
+};
+
 Taiten.arcade_shooter.Shooter = class
 {
     constructor (player) {
@@ -168,6 +181,7 @@ Taiten.arcade_shooter.Shooter = class
         if (!this.is_initted) {
             globalThis.$gameMap = new Game_Map();
             this._.super_performTransfer();
+            Taiten.arcade_shooter.reset_self_switches();
             this.is_initted = true;
             return;
         }
