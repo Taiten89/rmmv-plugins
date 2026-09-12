@@ -176,11 +176,16 @@ Taiten.arcade_shooter.Shooter = class
         this.target_hp[event.eventId()] -= power;
 
         const hit = new Taiten.arcade_shooter.Hit(event, power);
-        for (let i=0; i<this.hits.length; i++)
+        for (let i=0; i<this.hits.length; i++) {
             if (this.hits[i].state === 'destructed') {
                 this.hits[i] = hit;
                 return;
             }
+            if (this.hits[i].event.eventId() === event.eventId()) {
+                this.hits[i].add_power(power);
+                return;
+            }
+        }
         this.hits.push(hit);
     }
 
@@ -350,6 +355,10 @@ Taiten.arcade_shooter.Hit = class
 
     destruct () {
         this.state = 'destructed';
+    }
+
+    add_power (extra_power) {
+        this.gleam_remaining += extra_power;
     }
 
     update () {
