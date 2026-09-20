@@ -397,12 +397,14 @@ class extends Base
 };
 
 {  //  stop minigame instead of menu
-    super_funcs.ChJe = Scene_Map.prototype.callMenu;
-    Scene_Map.prototype.callMenu = function ()
-    {
-        if (Taiten.arcade_shooter.is_active)
-            Taiten.arcade_shooter.stop();
-        else
-            super_funcs.ChJe.call(this);
-    };
+
+super_funcs.ChJe = Scene_Map.prototype.callMenu;
+Scene_Map.prototype.callMenu = function ()
+{
+    if (Taiten.arcade_shooter.is_active)
+        Taiten.arcade_shooter.stop();
+    else
+        super_funcs.ChJe.call(this);
+};
+
 }

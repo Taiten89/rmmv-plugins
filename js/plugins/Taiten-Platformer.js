@@ -38,13 +38,13 @@ Taiten.platformer =
 
 super_funcs.hVnQ = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function (command, args)
-    {
-        if (command === 'start-platformer')
-            Taiten.platformer.start(...args);
-        if (command === 'stop-platformer')
-            Taiten.platformer.stop();
-        super_funcs.hVnQ.call(this, command, args);
-    };
+{
+    if (command === 'start-platformer')
+        Taiten.platformer.start(...args);
+    if (command === 'stop-platformer')
+        Taiten.platformer.stop();
+    super_funcs.hVnQ.call(this, command, args);
+};
 
 Taiten.platformer.start = function (mapId_str, x_str, y_str)
 {
@@ -272,12 +272,14 @@ class extends Base
 };
 
 {  //  stop minigame instead of menu
-    super_funcs.nmef = Scene_Map.prototype.callMenu;
-    Scene_Map.prototype.callMenu = function ()
-    {
-        if (Taiten.platformer.is_active)
-            Taiten.platformer.stop();
-        else
-            super_funcs.nmef.call(this);
-    };
+
+super_funcs.nmef = Scene_Map.prototype.callMenu;
+Scene_Map.prototype.callMenu = function ()
+{
+    if (Taiten.platformer.is_active)
+        Taiten.platformer.stop();
+    else
+        super_funcs.nmef.call(this);
+};
+
 }
