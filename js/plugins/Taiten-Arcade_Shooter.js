@@ -28,6 +28,7 @@
  */
 
 globalThis.Taiten = globalThis.Taiten || {};
+globalThis.super_funcs = globalThis.super_funcs || {};
 
 Taiten.arcade_shooter =
 {
@@ -57,15 +58,13 @@ for (const region_str of region_strs)
     Taiten.arcade_shooter.SHOT_BLOCKERS[region_str] = true;
 }
 
-Taiten.Arcade_Shooter_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+super_funcs.kfUr = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function (command, args) {
-    const super_func = Taiten.Arcade_Shooter_Game_Interpreter_pluginCommand;
-
     if (command === 'start-arcade_shooter')
         Taiten.arcade_shooter.start(...args);
     if (command === 'stop-arcade_shooter')
         Taiten.arcade_shooter.stop();
-    super_func.call(this, command, args);
+    super_funcs.kfUr.call(this, command, args);
 };
 
 Taiten.arcade_shooter.start = function (mapId_str, x_str, y_str)
@@ -398,14 +397,12 @@ class extends Base
 };
 
 {  //  stop minigame instead of menu
-    Taiten.Arcade_Shooter_Scene_Map_callMenu = Scene_Map.prototype.callMenu;
+    super_funcs.ChJe = Scene_Map.prototype.callMenu;
     Scene_Map.prototype.callMenu = function ()
     {
-        const super_func = Taiten.Arcade_Shooter_Scene_Map_callMenu;
-
         if (Taiten.arcade_shooter.is_active)
             Taiten.arcade_shooter.stop();
         else
-            super_func.call(this);
+            super_funcs.ChJe.call(this);
     };
 }
