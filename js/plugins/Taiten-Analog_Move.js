@@ -398,14 +398,14 @@ Game_Interpreter.prototype.setup = function (list, eventId) {
         const is_player = command.parameters[0] === -1;
         if (is_move_route) {
             if (is_player)
-                this.dbe_on_player_move_route(command);
+                this.on_player_move_route(command);
         }
     }
 
     super_funcs.kGv1.call(this, list, eventId);
 };
 
-Game_Interpreter.prototype.dbe_on_player_move_route = function (command) {
+Game_Interpreter.prototype.on_player_move_route = function (command) {
     this.pluginCommand('drag-to-raster', []);
 };
 
