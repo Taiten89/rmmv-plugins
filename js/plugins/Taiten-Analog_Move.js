@@ -28,17 +28,6 @@ Game_Player.prototype.initMembers = function ()
     this.taiten_is_in_drag_phase = false;
 };
 
-super_funcs.TdDc = Game_Player.prototype.forceMoveRoute;
-Game_Player.prototype.forceMoveRoute = function (moveRoute)
-{
-    this.taiten_speed_x = 0.0;
-    this.taiten_speed_y = 0.0;
-    this._realX = this._x;
-    this._realY = this._y;
-
-    super_funcs.TdDc.call(this, moveRoute);
-};
-
 super_funcs.HWax = Game_Player.prototype.updateMove;
 Game_Player.prototype.updateMove = function ()
 {
@@ -401,6 +390,24 @@ Game_Player.prototype.taiten_update_nonmoving_phase = function ()
 
 }
 {  //  monkeypatch Game_Interpreter
+
+super_funcs.kGv1 = Game_Interpreter.prototype.setup;
+Game_Interpreter.prototype.setup = function (list, eventId) {
+    for (const command of list) {
+        const is_move_route = command.code === 205;
+        const is_player = command.parameters[0] === -1;
+        if (is_move_route) {
+            if (is_player)
+                this.dbe_on_player_move_route(command);
+        }
+    }
+
+    super_funcs.kGv1.call(this, list, eventId);
+};
+
+Game_Interpreter.prototype.dbe_on_player_move_route = function (command) {
+    this.pluginCommand('drag-to-raster', []);
+};
 
 super_funcs.GurM = Game_Interpreter.prototype.update;
 Game_Interpreter.prototype.update = function ()
