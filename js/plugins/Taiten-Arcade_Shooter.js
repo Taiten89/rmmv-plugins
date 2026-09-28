@@ -1,5 +1,8 @@
 "use strict";
 
+if (!("globalThis" in this))
+    this.globalThis = this;
+
 /*:
  * @plugindesc Taiten's Arcade_Shooter plugin.
  * @author Taiten - github.com/Taiten89/

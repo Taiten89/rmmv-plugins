@@ -1,5 +1,8 @@
 "use strict";
 
+if (!("globalThis" in this))
+    this.globalThis = this;
+
 /*:
  * @plugindesc Taiten's Analog_Move plugin.
  * @author Taiten - github.com/Taiten89/
