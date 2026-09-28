@@ -147,7 +147,8 @@ Game_Player.prototype.taiten_moveByInput = function ()
     }
     if (Math.abs(nivy) > 0.5**0.5 + 0.1)
     {
-        if (nivy > 0)
+        if (nivy > 0 && !this.isOnLadder())
+            // ladder handling originally in increaseSteps()
             this.setDirection(2);
         else
             this.setDirection(8);
