@@ -94,22 +94,90 @@ Platformer.unstore_orig = function ()
     Platformer.orig_player = null;
 };
 
+Platformer.Player = class {
+    constructor (player) {
+        this._ = player;
+
+        this.is_initted = false;
+        this.jump_remaining = 0;
+        this.is_jump_triggered = false;
+        this.is_on_ground = false;
+
+        for (const k in Platformer.defaults)
+            this[k] = Platformer.defaults[k];
+    }
+
+    move_by_direction_input ()
+    {
+        const direction = this._.getInputDirection();
+        this._.setDirection(direction);
+        if (this.is_on_ground)
+        {
+            if (direction === 4)
+                this._.analog_move.accelerate_x(-this.F_side);
+            else if (direction === 6)
+                this._.analog_move.accelerate_x(+this.F_side);
+            else
+                this.brake_x();
+        }
+        else
+        {
+            if (direction === 4)
+                this._.analog_move.accelerate_x(-this.F_side / 4);
+            else if (direction === 6)
+                this._.analog_move.accelerate_x(+this.F_side / 4);
+        }
+    }
+
+    handle_jump_pressed ()
+    {
+        if (this.is_jump_triggered && this.is_on_ground)
+        {
+            this.jump_remaining = this.jump_max;
+            this.is_jump_triggered = false;
+        }
+    }
+
+    brake_x ()
+    {
+        this._.analog_move.speed_x *= 0.75;
+    }
+
+    apply_wind_resistance ()
+    {
+        this._.analog_move.speed_x *= 1.0 - 1.0 / 64.0;
+        this._.analog_move.speed_y *= 1.0 - 1.0 / 64.0;
+    }
+
+    apply_ground_resistance ()
+    {
+        this._.analog_move.speed_x *= 1.0 - 1.0 / 32.0;
+    }
+
+    update_is_on_ground ()
+    {
+        const can_pass = this._.canPass(this._._x, this._._y, 2);
+        const has_gap = this._._realY !== this._._y;
+        this.is_on_ground = !can_pass && !has_gap;
+    }
+};
+
 Platformer.Analog_Move_Player = class extends Analog_Move.Player {
     move_by_input () {
         if (Input.isTriggered(Platformer.JUMP_INPUT))
-            this._.platformer_is_jump_triggered = true;
+            this._.platformer.is_jump_triggered = true;
         if (!Input.isPressed(Platformer.JUMP_INPUT))
         {
-            this._.platformer_is_jump_triggered = false;
-            this._.platformer_jump_remaining = 0;
+            this._.platformer.is_jump_triggered = false;
+            this._.platformer.jump_remaining = 0;
         }
 
         if (this._.canMove())
         {
-            this._.platformer_move_by_direction_input();
+            this._.platformer.move_by_direction_input();
 
             if (Input.isPressed(Platformer.JUMP_INPUT))
-                this._.platformer_handle_jump_pressed();
+                this._.platformer.handle_jump_pressed();
         }
     }
 
@@ -143,21 +211,21 @@ Platformer.Analog_Move_Player = class extends Analog_Move.Player {
 
     modify_and_apply_speed ()
     {
-        this.accelerate_y(this._.platformer_G);
+        this.accelerate_y(this._.platformer.G);
 
-        if (this._.platformer_jump_remaining)
+        if (this._.platformer.jump_remaining)
         {
-            this.accelerate_y(-this._.platformer_F_jump);
-            this._.platformer_jump_remaining--;
+            this.accelerate_y(-this._.platformer.F_jump);
+            this._.platformer.jump_remaining--;
         }
 
-        this._.platformer_apply_wind_resistance();
-        if (this._.platformer_is_on_ground)
-            this._.platformer_apply_ground_resistance();
+        this._.platformer.apply_wind_resistance();
+        if (this._.platformer.is_on_ground)
+            this._.platformer.apply_ground_resistance();
 
         super.modify_and_apply_speed();
 
-        this._.platformer_update_is_on_ground();
+        this._.platformer.update_is_on_ground();
     }
 };
 
@@ -168,23 +236,16 @@ class extends Base
     {
         super.initMembers();
         this.analog_move = new Platformer.Analog_Move_Player(this);
-
-        this.platformer_is_initted = false;
-        this.platformer_jump_remaining = 0;
-        this.platformer_is_jump_triggered = false;
-        this.platformer_is_on_ground = false;
-
-        for (const k in Platformer.defaults)
-            this["platformer_"+k] = Platformer.defaults[k];
+        this.platformer = new Platformer.Player(this);
     }
 
     performTransfer ()
     {
-        if (!this.platformer_is_initted)
+        if (!this.platformer.is_initted)
         {
             $gameMap = new Game_Map();
             super.performTransfer();
-            this.platformer_is_initted = true;
+            this.platformer.is_initted = true;
             return;
         }
 
@@ -198,14 +259,14 @@ class extends Base
 
     hasWalkAnime ()
     {
-        if (!this.platformer_is_on_ground)
+        if (!this.platformer.is_on_ground)
             return false;
         return super.hasWalkAnime();
     }
     locate (x, y)
     {
         super.locate(x, y);
-        this.platformer_update_is_on_ground();
+        this.platformer.update_is_on_ground();
     }
 
     setDirection (dir)
@@ -213,60 +274,6 @@ class extends Base
         if (dir === 2 || dir === 8)
             return;
         super.setDirection(dir);
-    }
-
-    platformer_move_by_direction_input ()
-    {
-        const direction = this.getInputDirection();
-        this.setDirection(direction);
-        if (this.platformer_is_on_ground)
-        {
-            if (direction === 4)
-                this.analog_move.accelerate_x(-this.platformer_F_side);
-            else if (direction === 6)
-                this.analog_move.accelerate_x(+this.platformer_F_side);
-            else
-                this.platformer_brake_x();
-        }
-        else
-        {
-            if (direction === 4)
-                this.analog_move.accelerate_x(-this.platformer_F_side / 4);
-            else if (direction === 6)
-                this.analog_move.accelerate_x(+this.platformer_F_side / 4);
-        }
-    }
-
-    platformer_handle_jump_pressed ()
-    {
-        if (this.platformer_is_jump_triggered && this.platformer_is_on_ground)
-        {
-            this.platformer_jump_remaining = this.platformer_jump_max;
-            this.platformer_is_jump_triggered = false;
-        }
-    }
-
-    platformer_brake_x ()
-    {
-        this.analog_move.speed_x *= 0.75;
-    }
-
-    platformer_apply_wind_resistance ()
-    {
-        this.analog_move.speed_x *= 1.0 - 1.0 / 64.0;
-        this.analog_move.speed_y *= 1.0 - 1.0 / 64.0;
-    }
-
-    platformer_apply_ground_resistance ()
-    {
-        this.analog_move.speed_x *= 1.0 - 1.0 / 32.0;
-    }
-
-    platformer_update_is_on_ground ()
-    {
-        const can_pass = this.canPass(this._x, this._y, 2);
-        const has_gap = this._realY !== this._y;
-        this.platformer_is_on_ground = !can_pass && !has_gap;
     }
 };
 
