@@ -30,11 +30,9 @@ if (!("globalThis" in this))
  * @default []
  */
 
-globalThis.Taiten = globalThis.Taiten || {};
 globalThis.super_funcs = globalThis.super_funcs || {};
 
-Taiten.arcade_shooter =
-{
+globalThis.Arcade_Shooter = {
     SHOT_PICTURE: PluginManager.parameters('Taiten-Arcade_Shooter').shot_picture,
     SHOT_BLOCKERS: {},
     SHOOT_INPUT: 'ok',
@@ -58,29 +56,29 @@ const region_json = PluginManager.parameters('Taiten-Arcade_Shooter').shot_block
 const region_strs = JSON.parse(region_json);
 for (const region_str of region_strs)
     // js converts integers to strings when accessing these later
-    Taiten.arcade_shooter.SHOT_BLOCKERS[region_str] = true;
+    Arcade_Shooter.SHOT_BLOCKERS[region_str] = true;
 }
 
 super_funcs.kfUr = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function (command, args) {
     if (command === 'start-arcade_shooter')
-        Taiten.arcade_shooter.start(...args);
+        Arcade_Shooter.start(...args);
     if (command === 'stop-arcade_shooter')
-        Taiten.arcade_shooter.stop();
+        Arcade_Shooter.stop();
     super_funcs.kfUr.call(this, command, args);
 };
 
-Taiten.arcade_shooter.start = function (mapId_str, x_str, y_str)
+Arcade_Shooter.start = function (mapId_str, x_str, y_str)
 {
-    Taiten.arcade_shooter.is_active = true;
+    Arcade_Shooter.is_active = true;
 
-    Taiten.arcade_shooter.orig_bgm = {...AudioManager.saveBgm()};
-    Taiten.arcade_shooter.orig_bgs = {...AudioManager.saveBgs()};
+    Arcade_Shooter.orig_bgm = {...AudioManager.saveBgm()};
+    Arcade_Shooter.orig_bgs = {...AudioManager.saveBgs()};
     AudioManager.stopBgm();
     AudioManager.stopBgs();
 
-    Taiten.arcade_shooter.store_orig();
-    const Extended_Game_Player = Taiten.arcade_shooter.extend_Character(Game_Player);
+    Arcade_Shooter.store_orig();
+    const Extended_Game_Player = Arcade_Shooter.extend_Character(Game_Player);
     globalThis.$gamePlayer = new Extended_Game_Player();
 
     const mapId = Number(mapId_str);
@@ -89,41 +87,41 @@ Taiten.arcade_shooter.start = function (mapId_str, x_str, y_str)
     $gamePlayer.reserveTransfer(mapId, x, y, 8, 0);
 };
 
-Taiten.arcade_shooter.stop = function ()
+Arcade_Shooter.stop = function ()
 {
-    Taiten.arcade_shooter.is_active = false;
+    Arcade_Shooter.is_active = false;
 
     $gamePlayer.arcade_shooter.destruct();
 
-    AudioManager.playBgm(Taiten.arcade_shooter.orig_bgm, Taiten.arcade_shooter.orig_bgm.pos);
-    AudioManager.playBgs(Taiten.arcade_shooter.orig_bgs);
-    Taiten.arcade_shooter.orig_bgm = {};
-    Taiten.arcade_shooter.orig_bgs = {};
+    AudioManager.playBgm(Arcade_Shooter.orig_bgm, Arcade_Shooter.orig_bgm.pos);
+    AudioManager.playBgs(Arcade_Shooter.orig_bgs);
+    Arcade_Shooter.orig_bgm = {};
+    Arcade_Shooter.orig_bgs = {};
 
-    const mapId = Taiten.arcade_shooter.orig_gameMap.mapId();
+    const mapId = Arcade_Shooter.orig_gameMap.mapId();
     const x = 0;
     const y = 0;
     $gamePlayer.reserveTransfer(mapId, x, y, 2, 0);
 };
 
-Taiten.arcade_shooter.store_orig = function ()
+Arcade_Shooter.store_orig = function ()
 {
-    Taiten.arcade_shooter.orig_dataMap = $dataMap;
-    Taiten.arcade_shooter.orig_gameMap = $gameMap;
-    Taiten.arcade_shooter.orig_player = $gamePlayer;
+    Arcade_Shooter.orig_dataMap = $dataMap;
+    Arcade_Shooter.orig_gameMap = $gameMap;
+    Arcade_Shooter.orig_player = $gamePlayer;
 };
 
-Taiten.arcade_shooter.unstore_orig = function ()
+Arcade_Shooter.unstore_orig = function ()
 {
-    globalThis.$dataMap = Taiten.arcade_shooter.orig_dataMap;
-    globalThis.$gameMap = Taiten.arcade_shooter.orig_gameMap;
-    globalThis.$gamePlayer = Taiten.arcade_shooter.orig_player;
-    Taiten.arcade_shooter.orig_dataMap = null;
-    Taiten.arcade_shooter.orig_gameMap = null;
-    Taiten.arcade_shooter.orig_player = null;
+    globalThis.$dataMap = Arcade_Shooter.orig_dataMap;
+    globalThis.$gameMap = Arcade_Shooter.orig_gameMap;
+    globalThis.$gamePlayer = Arcade_Shooter.orig_player;
+    Arcade_Shooter.orig_dataMap = null;
+    Arcade_Shooter.orig_gameMap = null;
+    Arcade_Shooter.orig_player = null;
 };
 
-Taiten.arcade_shooter.reset_self_switches = function ()
+Arcade_Shooter.reset_self_switches = function ()
 {
     for (const ev of $gameMap.events()) {
         if (ev._erased)
@@ -135,7 +133,7 @@ Taiten.arcade_shooter.reset_self_switches = function ()
     }
 };
 
-Taiten.arcade_shooter.Shooter = class
+Arcade_Shooter.Shooter = class
 {
     constructor (player) {
         this._ = player;
@@ -145,8 +143,8 @@ Taiten.arcade_shooter.Shooter = class
         this.hits = [];
         this.target_hp = {};
 
-        for (const k in Taiten.arcade_shooter.defaults)
-            this[k] = Taiten.arcade_shooter.defaults[k];
+        for (const k in Arcade_Shooter.defaults)
+            this[k] = Arcade_Shooter.defaults[k];
     }
 
     destruct () {
@@ -156,7 +154,7 @@ Taiten.arcade_shooter.Shooter = class
     }
 
     shoot () {
-        const shot = new Taiten.arcade_shooter.Shot(this);
+        const shot = new Arcade_Shooter.Shot(this);
 
         for (let i=0; i<this.shots.length; i++)
             if (this.shots[i].state === 'destructed') {
@@ -177,7 +175,7 @@ Taiten.arcade_shooter.Shooter = class
         }
         this.target_hp[event.eventId()] -= power;
 
-        const hit = new Taiten.arcade_shooter.Hit(event, power);
+        const hit = new Arcade_Shooter.Hit(event, power);
         for (let i=0; i<this.hits.length; i++) {
             if (this.hits[i].state === 'destructed') {
                 this.hits[i] = hit;
@@ -195,12 +193,12 @@ Taiten.arcade_shooter.Shooter = class
         if (!this.is_initted) {
             globalThis.$gameMap = new Game_Map();
             this._.super_performTransfer();
-            Taiten.arcade_shooter.reset_self_switches();
+            Arcade_Shooter.reset_self_switches();
             this.is_initted = true;
             return;
         }
-        if (!Taiten.arcade_shooter.is_active) {
-            Taiten.arcade_shooter.unstore_orig();
+        if (!Arcade_Shooter.is_active) {
+            Arcade_Shooter.unstore_orig();
             this._.super_performTransfer();
             return;
         }
@@ -217,7 +215,7 @@ Taiten.arcade_shooter.Shooter = class
     }
 
     update_input () {
-        if (Input.isTriggered(Taiten.arcade_shooter.SHOOT_INPUT))
+        if (Input.isTriggered(Arcade_Shooter.SHOOT_INPUT))
             this.shoot();
     }
 
@@ -247,7 +245,7 @@ Taiten.arcade_shooter.Shooter = class
     }
 };
 
-Taiten.arcade_shooter.Shot = class extends Game_Character
+Arcade_Shooter.Shot = class extends Game_Character
 {
     constructor (shooter) {
         super();
@@ -257,11 +255,11 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
         this.power = 1;
         this.state = 'loading';
 
-        Taiten.arcade_shooter.last_picture_id--;
-        if (Taiten.arcade_shooter.last_picture_id === 50)
-            Taiten.arcade_shooter.last_picture_id = 99;
-        this.picture_id = Taiten.arcade_shooter.last_picture_id;
-        const name = Taiten.arcade_shooter.SHOT_PICTURE;
+        Arcade_Shooter.last_picture_id--;
+        if (Arcade_Shooter.last_picture_id === 50)
+            Arcade_Shooter.last_picture_id = 99;
+        this.picture_id = Arcade_Shooter.last_picture_id;
+        const name = Arcade_Shooter.SHOT_PICTURE;
         $gameScreen.showPicture(this.picture_id, name, 0, -1, -1,
                                 100, 100, 255, 0);
     }
@@ -290,7 +288,7 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
 
         this.power++;
 
-        const a = !Input.isPressed(Taiten.arcade_shooter.SHOOT_INPUT);
+        const a = !Input.isPressed(Arcade_Shooter.SHOOT_INPUT);
         const b = this.power === this._.max_shot_power;
         if (a || b)
             this.fire();
@@ -318,7 +316,7 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
         this._realY = _y - y_pn_gap;
 
         const region_id = $gameMap.regionId(_x, _y);
-        if (Taiten.arcade_shooter.SHOT_BLOCKERS[region_id])
+        if (Arcade_Shooter.SHOT_BLOCKERS[region_id])
             this.destruct();
     }
     update_hits () {
@@ -347,7 +345,7 @@ Taiten.arcade_shooter.Shot = class extends Game_Character
     }
 };
 
-Taiten.arcade_shooter.Hit = class
+Arcade_Shooter.Hit = class
 {
     constructor (event, power) {
         this.event = event;
@@ -379,12 +377,12 @@ Taiten.arcade_shooter.Hit = class
     }
 };
 
-Taiten.arcade_shooter.extend_Character = (Base) =>
+Arcade_Shooter.extend_Character = (Base) =>
 class extends Base
 {
     initMembers () {
         super.initMembers();
-        this.arcade_shooter = new Taiten.arcade_shooter.Shooter(this);
+        this.arcade_shooter = new Arcade_Shooter.Shooter(this);
     }
 
     performTransfer () {
@@ -404,8 +402,8 @@ class extends Base
 super_funcs.ChJe = Scene_Map.prototype.callMenu;
 Scene_Map.prototype.callMenu = function ()
 {
-    if (Taiten.arcade_shooter.is_active)
-        Taiten.arcade_shooter.stop();
+    if (Arcade_Shooter.is_active)
+        Arcade_Shooter.stop();
     else
         super_funcs.ChJe.call(this);
 };

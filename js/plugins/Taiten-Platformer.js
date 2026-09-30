@@ -15,10 +15,7 @@
  *   stop-platformer
  */
 
-globalThis.Taiten = globalThis.Taiten || {};
-
-Taiten.platformer =
-{
+globalThis.Platformer = {
     JUMP_INPUT: 'ok',
     is_active: false,
     orig_dataMap: null,
@@ -40,23 +37,23 @@ super_funcs.hVnQ = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function (command, args)
 {
     if (command === 'start-platformer')
-        Taiten.platformer.start(...args);
+        Platformer.start(...args);
     if (command === 'stop-platformer')
-        Taiten.platformer.stop();
+        Platformer.stop();
     super_funcs.hVnQ.call(this, command, args);
 };
 
-Taiten.platformer.start = function (mapId_str, x_str, y_str)
+Platformer.start = function (mapId_str, x_str, y_str)
 {
-    Taiten.platformer.is_active = true;
+    Platformer.is_active = true;
 
-    Taiten.platformer.orig_bgm = {...AudioManager.saveBgm()};
-    Taiten.platformer.orig_bgs = {...AudioManager.saveBgs()};
+    Platformer.orig_bgm = {...AudioManager.saveBgm()};
+    Platformer.orig_bgs = {...AudioManager.saveBgs()};
     AudioManager.stopBgm();
     AudioManager.stopBgs();
 
-    Taiten.platformer.store_orig();
-    const Extended_Game_Player = Taiten.platformer.extend_Character(Game_Player);
+    Platformer.store_orig();
+    const Extended_Game_Player = Platformer.extend_Character(Game_Player);
     $gamePlayer = new Extended_Game_Player();
 
     const mapId = Number(mapId_str);
@@ -65,43 +62,43 @@ Taiten.platformer.start = function (mapId_str, x_str, y_str)
     $gamePlayer.reserveTransfer(mapId, x, y, 6, 0);
 };
 
-Taiten.platformer.stop = function ()
+Platformer.stop = function ()
 {
-    Taiten.platformer.is_active = false;
+    Platformer.is_active = false;
 
-    AudioManager.playBgm(Taiten.platformer.orig_bgm, Taiten.platformer.orig_bgm.pos);
-    AudioManager.playBgs(Taiten.platformer.orig_bgs);
-    Taiten.platformer.orig_bgm = {};
-    Taiten.platformer.orig_bgs = {};
+    AudioManager.playBgm(Platformer.orig_bgm, Platformer.orig_bgm.pos);
+    AudioManager.playBgs(Platformer.orig_bgs);
+    Platformer.orig_bgm = {};
+    Platformer.orig_bgs = {};
 
-    const mapId = Taiten.platformer.orig_gameMap.mapId();
+    const mapId = Platformer.orig_gameMap.mapId();
     const x = 0;
     const y = 0;
     $gamePlayer.reserveTransfer(mapId, x, y, 2, 0);
 };
 
-Taiten.platformer.store_orig = function ()
+Platformer.store_orig = function ()
 {
-    Taiten.platformer.orig_dataMap = $dataMap;
-    Taiten.platformer.orig_gameMap = $gameMap;
-    Taiten.platformer.orig_player = $gamePlayer;
+    Platformer.orig_dataMap = $dataMap;
+    Platformer.orig_gameMap = $gameMap;
+    Platformer.orig_player = $gamePlayer;
 };
 
-Taiten.platformer.unstore_orig = function ()
+Platformer.unstore_orig = function ()
 {
-    $dataMap = Taiten.platformer.orig_dataMap;
-    Taiten.platformer.orig_dataMap = null;
-    $gameMap = Taiten.platformer.orig_gameMap;
-    Taiten.platformer.orig_gameMap = null;
-    $gamePlayer = Taiten.platformer.orig_player;
-    Taiten.platformer.orig_player = null;
+    $dataMap = Platformer.orig_dataMap;
+    Platformer.orig_dataMap = null;
+    $gameMap = Platformer.orig_gameMap;
+    Platformer.orig_gameMap = null;
+    $gamePlayer = Platformer.orig_player;
+    Platformer.orig_player = null;
 };
 
-Taiten.platformer.Analog_Move_Player = class extends Analog_Move.Player {
+Platformer.Analog_Move_Player = class extends Analog_Move.Player {
     move_by_input () {
-        if (Input.isTriggered(Taiten.platformer.JUMP_INPUT))
+        if (Input.isTriggered(Platformer.JUMP_INPUT))
             this._.platformer_is_jump_triggered = true;
-        if (!Input.isPressed(Taiten.platformer.JUMP_INPUT))
+        if (!Input.isPressed(Platformer.JUMP_INPUT))
         {
             this._.platformer_is_jump_triggered = false;
             this._.platformer_jump_remaining = 0;
@@ -111,7 +108,7 @@ Taiten.platformer.Analog_Move_Player = class extends Analog_Move.Player {
         {
             this._.platformer_move_by_direction_input();
 
-            if (Input.isPressed(Taiten.platformer.JUMP_INPUT))
+            if (Input.isPressed(Platformer.JUMP_INPUT))
                 this._.platformer_handle_jump_pressed();
         }
     }
@@ -164,21 +161,21 @@ Taiten.platformer.Analog_Move_Player = class extends Analog_Move.Player {
     }
 };
 
-Taiten.platformer.extend_Character = (Base) =>
+Platformer.extend_Character = (Base) =>
 class extends Base
 {
     initMembers ()
     {
         super.initMembers();
-        this.analog_move = new Taiten.platformer.Analog_Move_Player(this);
+        this.analog_move = new Platformer.Analog_Move_Player(this);
 
         this.platformer_is_initted = false;
         this.platformer_jump_remaining = 0;
         this.platformer_is_jump_triggered = false;
         this.platformer_is_on_ground = false;
 
-        for (const k in Taiten.platformer.defaults)
-            this["platformer_"+k] = Taiten.platformer.defaults[k];
+        for (const k in Platformer.defaults)
+            this["platformer_"+k] = Platformer.defaults[k];
     }
 
     performTransfer ()
@@ -191,9 +188,9 @@ class extends Base
             return;
         }
 
-        if (!Taiten.platformer.is_active)
+        if (!Platformer.is_active)
         {
-            Taiten.platformer.unstore_orig();
+            Platformer.unstore_orig();
             super.performTransfer();
             return;
         }
@@ -278,8 +275,8 @@ class extends Base
 super_funcs.nmef = Scene_Map.prototype.callMenu;
 Scene_Map.prototype.callMenu = function ()
 {
-    if (Taiten.platformer.is_active)
-        Taiten.platformer.stop();
+    if (Platformer.is_active)
+        Platformer.stop();
     else
         super_funcs.nmef.call(this);
 };
