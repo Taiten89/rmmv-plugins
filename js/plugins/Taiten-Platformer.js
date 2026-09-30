@@ -97,12 +97,80 @@ Taiten.platformer.unstore_orig = function ()
     Taiten.platformer.orig_player = null;
 };
 
+Taiten.platformer.Analog_Move_Player = class extends Analog_Move.Player {
+    move_by_input () {
+        if (Input.isTriggered(Taiten.platformer.JUMP_INPUT))
+            this._.platformer_is_jump_triggered = true;
+        if (!Input.isPressed(Taiten.platformer.JUMP_INPUT))
+        {
+            this._.platformer_is_jump_triggered = false;
+            this._.platformer_jump_remaining = 0;
+        }
+
+        if (this._.canMove())
+        {
+            this._.platformer_move_by_direction_input();
+
+            if (Input.isPressed(Taiten.platformer.JUMP_INPUT))
+                this._.platformer_handle_jump_pressed();
+        }
+    }
+
+    apply_ground_resistance () {}
+
+    apply_speed_x ()
+    {
+        const super_result = super.apply_speed_x();
+        if (!super_result)
+        {
+            this.speed_x = 0.0;
+            this._._realX = this._._x;
+        }
+        // hack: discard super result;
+        // drag-to-raster won't be provoked
+        return true;
+    }
+
+    apply_speed_y ()
+    {
+        const super_result = super.apply_speed_y();
+        if (!super_result)
+        {
+            this.speed_y = 0.0;
+            this._._realY = this._._y;
+        }
+        // hack: discard super result;
+        // drag-to-raster won't be provoked
+        return true;
+    }
+
+    modify_and_apply_speed ()
+    {
+        this.accelerate_y(this._.platformer_G);
+
+        if (this._.platformer_jump_remaining)
+        {
+            this.accelerate_y(-this._.platformer_F_jump);
+            this._.platformer_jump_remaining--;
+        }
+
+        this._.platformer_apply_wind_resistance();
+        if (this._.platformer_is_on_ground)
+            this._.platformer_apply_ground_resistance();
+
+        super.modify_and_apply_speed();
+
+        this._.platformer_update_is_on_ground();
+    }
+};
+
 Taiten.platformer.extend_Character = (Base) =>
 class extends Base
 {
     initMembers ()
     {
         super.initMembers();
+        this.analog_move = new Taiten.platformer.Analog_Move_Player(this);
 
         this.platformer_is_initted = false;
         this.platformer_jump_remaining = 0;
@@ -150,53 +218,6 @@ class extends Base
         super.setDirection(dir);
     }
 
-    taiten_moveByInput ()
-    {
-        if (Input.isTriggered(Taiten.platformer.JUMP_INPUT))
-            this.platformer_is_jump_triggered = true;
-        if (!Input.isPressed(Taiten.platformer.JUMP_INPUT))
-        {
-            this.platformer_is_jump_triggered = false;
-            this.platformer_jump_remaining = 0;
-        }
-
-        if (this.canMove())
-        {
-            this.platformer_move_by_direction_input();
-
-            if (Input.isPressed(Taiten.platformer.JUMP_INPUT))
-                this.platformer_handle_jump_pressed();
-        }
-    }
-
-    taiten_apply_ground_resistance () {}
-
-    taiten_apply_speed_x ()
-    {
-        const super_result = super.taiten_apply_speed_x();
-        if (!super_result)
-        {
-            this.taiten_speed_x = 0.0;
-            this._realX = this._x;
-        }
-        // hack: discard super result;
-        // drag-to-raster won't be provoked
-        return true;
-    }
-
-    taiten_apply_speed_y ()
-    {
-        const super_result = super.taiten_apply_speed_y();
-        if (!super_result)
-        {
-            this.taiten_speed_y = 0.0;
-            this._realY = this._y;
-        }
-        // hack: discard super result;
-        // drag-to-raster won't be provoked
-        return true;
-    }
-
     platformer_move_by_direction_input ()
     {
         const direction = this.getInputDirection();
@@ -204,18 +225,18 @@ class extends Base
         if (this.platformer_is_on_ground)
         {
             if (direction === 4)
-                this.taiten_accelerate_x(-this.platformer_F_side);
+                this.analog_move.accelerate_x(-this.platformer_F_side);
             else if (direction === 6)
-                this.taiten_accelerate_x(+this.platformer_F_side);
+                this.analog_move.accelerate_x(+this.platformer_F_side);
             else
                 this.platformer_brake_x();
         }
         else
         {
             if (direction === 4)
-                this.taiten_accelerate_x(-this.platformer_F_side / 4);
+                this.analog_move.accelerate_x(-this.platformer_F_side / 4);
             else if (direction === 6)
-                this.taiten_accelerate_x(+this.platformer_F_side / 4);
+                this.analog_move.accelerate_x(+this.platformer_F_side / 4);
         }
     }
 
@@ -230,18 +251,18 @@ class extends Base
 
     platformer_brake_x ()
     {
-        this.taiten_speed_x *= 0.75;
+        this.analog_move.speed_x *= 0.75;
     }
 
     platformer_apply_wind_resistance ()
     {
-        this.taiten_speed_x *= 1.0 - 1.0 / 64.0;
-        this.taiten_speed_y *= 1.0 - 1.0 / 64.0;
+        this.analog_move.speed_x *= 1.0 - 1.0 / 64.0;
+        this.analog_move.speed_y *= 1.0 - 1.0 / 64.0;
     }
 
     platformer_apply_ground_resistance ()
     {
-        this.taiten_speed_x *= 1.0 - 1.0 / 32.0;
+        this.analog_move.speed_x *= 1.0 - 1.0 / 32.0;
     }
 
     platformer_update_is_on_ground ()
@@ -249,25 +270,6 @@ class extends Base
         const can_pass = this.canPass(this._x, this._y, 2);
         const has_gap = this._realY !== this._y;
         this.platformer_is_on_ground = !can_pass && !has_gap;
-    }
-
-    taiten_modify_and_apply_speed ()
-    {
-        this.taiten_accelerate_y(this.platformer_G);
-
-        if (this.platformer_jump_remaining)
-        {
-            this.taiten_accelerate_y(-this.platformer_F_jump);
-            this.platformer_jump_remaining--;
-        }
-
-        this.platformer_apply_wind_resistance();
-        if (this.platformer_is_on_ground)
-            this.platformer_apply_ground_resistance();
-
-        super.taiten_modify_and_apply_speed();
-
-        this.platformer_update_is_on_ground();
     }
 };
 
