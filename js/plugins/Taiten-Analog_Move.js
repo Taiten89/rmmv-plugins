@@ -123,18 +123,32 @@ Analog_Move.Player = class {
     }
 
     apply_ground_resistance () {
-        this.speed_x *= 1.0 - this.ground_resistance();
-        this.speed_y *= 1.0 - this.ground_resistance();
-    }
 
-    ground_resistance () {
-        return 0.12;
+        // make accel harder with increasing speed
+        const BASE_RESISTANCE = 0.1;
+        const FACTOR = 1.0 - BASE_RESISTANCE;
+        this.speed_x *= FACTOR;
+        this.speed_y *= FACTOR;
+
+        // subtract from speed
+        const speed = (this.speed_x**2 + this.speed_y**2) ** 0.5;
+        const G = 9.8 / 60 / 2.0;
+        const sub = 0.05 * G;
+        if (speed < sub) {
+            this.speed_x = 0.0;
+            this.speed_y = 0.0;
+            return;
+        }
+        else {
+            const factor = (speed - sub) / speed;
+            this.speed_x *= factor;
+            this.speed_y *= factor;
+        }
     }
 
     modify_and_apply_speed () {
         let next_needs_drag_to_raster = false;
 
-        this.apply_min_speed();
         this.apply_ground_resistance();
 
         if (this.needs_drag_to_raster)
@@ -264,13 +278,6 @@ Analog_Move.Player = class {
         this._._realY = this._._y - p_n_gap;
 
         return true;
-    }
-
-    apply_min_speed () {
-        if (Math.abs(this.speed_x) < this.min_speed())
-            this.speed_x = 0.0;
-        if (Math.abs(this.speed_y) < this.min_speed())
-            this.speed_y = 0.0;
     }
 
     min_speed () {
