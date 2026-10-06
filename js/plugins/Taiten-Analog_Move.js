@@ -107,7 +107,11 @@ Analog_Move.Player = class {
 
     F_side () {
         // assuming 2m field width
-        return 0.3 * 9.8 / 60 / 2.0;
+        const G = 9.8 / 60 / 2.0;
+        if (this._._dashing)
+            return 0.35 * G;
+        else
+            return 0.20 * G;
     }
 
     accelerate_x (force) {
