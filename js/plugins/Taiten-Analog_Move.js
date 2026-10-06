@@ -401,14 +401,13 @@ Analog_Move.Interpreter = class {
 
 {  //  monkeypatch Game_Interpreter
 
-super_funcs.iSQQ = Game_Interpreter.prototype.initialize;
-Game_Interpreter.prototype.initialize = function(depth) {
-    super_funcs.iSQQ.call(this, depth);
-    this.analog_move = new Analog_Move.Interpreter(this);
-};
-
 super_funcs.kGv1 = Game_Interpreter.prototype.setup;
 Game_Interpreter.prototype.setup = function (list, eventId) {
+
+    // needs to be refreshed after game loading;
+    // this should do for this plugin
+    this.analog_move = new Analog_Move.Interpreter(this);
+
     for (const command of list) {
         const is_move_route = command.code === 205;
         const is_player = command.parameters[0] === -1;
