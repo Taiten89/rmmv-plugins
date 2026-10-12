@@ -148,8 +148,6 @@ Analog_Move.Player = class {
     }
 
     modify_and_apply_speed () {
-        let next_needs_drag_to_raster = false;
-
         if (this.needs_drag_to_raster)
             this.drag_to_raster();
 
@@ -158,7 +156,6 @@ Analog_Move.Player = class {
             if ([4,6].includes(this._.direction()))
                 this._.checkEventTriggerTouchFront(this._.direction());
             this.speed_x = 0.0;
-            next_needs_drag_to_raster = true;
         }
 
         if (this.needs_drag_to_raster)
@@ -169,23 +166,33 @@ Analog_Move.Player = class {
             if ([2,8].includes(this._.direction()))
                 this._.checkEventTriggerTouchFront(this._.direction());
             this.speed_y = 0.0;
-            next_needs_drag_to_raster = true;
         }
 
-        this.needs_drag_to_raster = next_needs_drag_to_raster;
+        const a = (!apply_speed_x_successful) && (this.speed_y === 0.0);
+        const b = (!apply_speed_y_successful) && (this.speed_x === 0.0);
+        const c = (!apply_speed_x_successful) && (!apply_speed_y_successful);
+        this.needs_drag_to_raster = a || b || c;
     }
 
     can_pass (dir) {
+        const TOLERANCE = 0.05;
+        let _realX = this._._realX;
+        let _realY = this._._realY;
+        if (Math.abs(this._._realX - this._._x) <= TOLERANCE)
+            _realX = this._._x;
+        if (Math.abs(this._._realY - this._._y) <= TOLERANCE)
+            _realY = this._._y;
+
         if (dir === 2 || dir === 8) {
-            const f = Math.floor(this._._realX);
-            const c = $gameMap.roundX(Math.ceil(this._._realX));
+            const f = Math.floor(_realX);
+            const c = $gameMap.roundX(Math.ceil(_realX));
             const canPass_f = this._.canPass(f, this._._y, dir);
             const canPass_c = this._.canPass(c, this._._y, dir);
             return canPass_f && canPass_c;
         }
         if (dir === 4 || dir === 6) {
-            const f = Math.floor(this._._realY);
-            const c = $gameMap.roundY(Math.ceil(this._._realY));
+            const f = Math.floor(_realY);
+            const c = $gameMap.roundY(Math.ceil(_realY));
             const canPass_f = this._.canPass(this._._x, f, dir);
             const canPass_c = this._.canPass(this._._x, c, dir);
             return canPass_f && canPass_c;
