@@ -98,6 +98,7 @@ Analog_Move.Player = class {
         }
 
         this.modify_and_apply_speed();
+        this.apply_ground_resistance();
         this.update_nonmoving_phase();
 
         if (this.is_in_nonmoving_phase)
@@ -148,8 +149,6 @@ Analog_Move.Player = class {
 
     modify_and_apply_speed () {
         let next_needs_drag_to_raster = false;
-
-        this.apply_ground_resistance();
 
         if (this.needs_drag_to_raster)
             this.drag_to_raster();
@@ -278,10 +277,6 @@ Analog_Move.Player = class {
         this._._realY = this._._y - p_n_gap;
 
         return true;
-    }
-
-    min_speed () {
-        return 0.05 * this.F_side();
     }
 
     scroll_to_front () {
