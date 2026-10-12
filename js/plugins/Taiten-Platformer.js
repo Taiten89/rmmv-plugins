@@ -143,17 +143,6 @@ Platformer.Player = class {
         this._.analog_move.speed_x *= 0.75;
     }
 
-    apply_wind_resistance ()
-    {
-        this._.analog_move.speed_x *= 1.0 - 1.0 / 64.0;
-        this._.analog_move.speed_y *= 1.0 - 1.0 / 64.0;
-    }
-
-    apply_ground_resistance ()
-    {
-        this._.analog_move.speed_x *= 1.0 - 1.0 / 32.0;
-    }
-
     update_is_on_ground ()
     {
         const can_pass = this._.canPass(this._._x, this._._y, 2);
@@ -181,7 +170,19 @@ Platformer.Analog_Move_Player = class extends Analog_Move.Player {
         }
     }
 
-    apply_ground_resistance () {}
+    apply_ground_resistance ()
+    {
+        if (this._.platformer.is_on_ground)
+            super.apply_ground_resistance();
+        else
+            this.apply_wind_resistance();
+    }
+
+    apply_wind_resistance ()
+    {
+        this.speed_x *= 1.0 - 1.0 / 64.0;
+        this.speed_y *= 1.0 - 1.0 / 64.0;
+    }
 
     apply_speed_x ()
     {
@@ -218,10 +219,6 @@ Platformer.Analog_Move_Player = class extends Analog_Move.Player {
             this.accelerate_y(-this._.platformer.F_jump);
             this._.platformer.jump_remaining--;
         }
-
-        this._.platformer.apply_wind_resistance();
-        if (this._.platformer.is_on_ground)
-            this._.platformer.apply_ground_resistance();
 
         super.modify_and_apply_speed();
 
