@@ -376,6 +376,14 @@ Game_Player.prototype.isMoving = function ()
     return this.analog_move.is_moving();
 };
 
+super_funcs.M1lg = Game_Player.prototype.isStopping;
+Game_Player.prototype.isStopping = function ()
+{
+    if (this.analog_move.is_in_nonmoving_phase)
+        return false;
+    return super_funcs.M1lg.call(this);
+};
+
 super_funcs.Xhix = Game_Player.prototype.update;
 Game_Player.prototype.update = function (sceneActive)
 {
